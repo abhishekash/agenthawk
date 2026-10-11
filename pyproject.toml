@@ -3,9 +3,9 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "abhishekash-mcp-trace"
-version = "0.1.1"
-description = "MCP server that lets agents query their own OpenTelemetry traces — runs, span trees, slow spans, human-approval logs, token/cost usage."
+name = "agenthawk"
+version = "0.2.0"
+description = "Agent observability MCP server for querying OpenTelemetry traces, failures, tool health, security evidence, and regressions."
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.11"
@@ -26,16 +26,18 @@ dependencies = [
 dev = ["pytest>=8"]
 
 [project.scripts]
+agenthawk = "mcp_trace.server:main"
+agent-hawk = "mcp_trace.server:main"
 mcp-trace = "mcp_trace.server:main"
 abhishekash-mcp-trace = "mcp_trace.server:main"
 
 [project.urls]
-Homepage = "https://github.com/abhishekash/mcp-trace"
-Repository = "https://github.com/abhishekash/mcp-trace"
-Issues = "https://github.com/abhishekash/mcp-trace/issues"
+Homepage = "https://github.com/abhishekash/agenthawk"
+Repository = "https://github.com/abhishekash/agenthawk"
+Issues = "https://github.com/abhishekash/agenthawk/issues"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/mcp_trace"]
+packages = ["src/mcp_trace", "src/agenthawk"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

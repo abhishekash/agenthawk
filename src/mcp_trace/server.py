@@ -18,7 +18,7 @@ from mcp.server.mcpserver import MCPServer
 from mcp_trace import core
 
 mcp = MCPServer(
-    "mcp-trace",
+    "agenthawk",
     instructions=(
         "Query OpenTelemetry traces of agent runs (JSONL span files). "
         "Use list_runs to see recent runs, run_summary/span_tree to inspect one, "
@@ -159,5 +159,5 @@ def main() -> None:
     )
     args = parser.parse_args()
     _trace_dir = Path(args.trace_dir).resolve()
-    print(f"mcp-trace serving traces from {_trace_dir}", file=sys.stderr)
+    print(f"AgentHawk serving traces from {_trace_dir}", file=sys.stderr)
     mcp.run(transport="stdio")

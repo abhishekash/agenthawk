@@ -1,8 +1,8 @@
-# mcp-trace
+# AgentHawk
 
-<!-- mcp-name: io.github.abhishekash/mcp-trace -->
+<!-- mcp-name: io.github.abhishekash/agenthawk -->
 
-[![CI](https://github.com/abhishekash/mcp-trace/actions/workflows/ci.yml/badge.svg)](https://github.com/abhishekash/mcp-trace/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![CI](https://github.com/abhishekash/agenthawk/actions/workflows/ci.yml/badge.svg)](https://github.com/abhishekash/agenthawk/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 **Agents that can debug themselves.** An MCP server that exposes your agent runs — stored as plain OpenTelemetry JSONL span files — as queryable tools: runs, span trees, failures, tool health, security evidence, live activity, regressions, human-approval logs, token/cost usage.
 
@@ -26,17 +26,20 @@ The tools read stored traces and can poll files being written, but they do not p
 
 ## Install & run
 
-The `mcp-trace` name is occupied on PyPI by an unrelated project, so this server is published as `abhishekash-mcp-trace`; it exposes both the `abhishekash-mcp-trace` and `mcp-trace` commands.
+AgentHawk is the new canonical name. The legacy `abhishekash-mcp-trace` distribution and `mcp-trace` commands remain compatibility aliases for existing users.
 
 ```bash
-uvx abhishekash-mcp-trace --trace-dir ./traces
+uvx agenthawk --trace-dir ./traces
 # or, for local development:
-git clone https://github.com/abhishekash/mcp-trace
-cd mcp-trace && uv pip install -e .
-mcp-trace --trace-dir ./traces
+git clone https://github.com/abhishekash/agenthawk
+cd agenthawk && uv pip install -e .
+agenthawk --trace-dir ./traces
 ```
 
-The package is published on [PyPI](https://pypi.org/project/abhishekash-mcp-trace/0.1.1/), and the validated [`server.json`](server.json) is live in the [official MCP Registry](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.abhishekash%2Fmcp-trace/versions/0.1.1).
+The `agenthawk` 0.2.0 release is the renamed successor to the published
+[`abhishekash-mcp-trace` 0.1.1](https://pypi.org/project/abhishekash-mcp-trace/0.1.1/)
+distribution. Existing clients can continue using the legacy command while
+migrating.
 
 ## Client configuration
 
@@ -47,7 +50,7 @@ The package is published on [PyPI](https://pypi.org/project/abhishekash-mcp-trac
   "mcpServers": {
     "agent-traces": {
       "command": "uvx",
-      "args": ["abhishekash-mcp-trace", "--trace-dir", "/path/to/traces"]
+      "args": ["agenthawk", "--trace-dir", "/path/to/traces"]
     }
   }
 }
@@ -60,7 +63,7 @@ The package is published on [PyPI](https://pypi.org/project/abhishekash-mcp-trac
   "mcpServers": {
     "agent-traces": {
       "command": "uvx",
-      "args": ["abhishekash-mcp-trace", "--trace-dir", "/path/to/traces"]
+      "args": ["agenthawk", "--trace-dir", "/path/to/traces"]
     }
   }
 }
@@ -69,7 +72,7 @@ The package is published on [PyPI](https://pypi.org/project/abhishekash-mcp-trac
 **agent-harness** (mounted as gated tools):
 
 ```bash
-harness run "Why was my last run slow?" --mcp "uvx abhishekash-mcp-trace --trace-dir ./traces"
+harness run "Why was my last run slow?" --mcp "uvx agenthawk --trace-dir ./traces"
 ```
 
 ## Tools
@@ -106,9 +109,9 @@ Tool descriptions are written as prompts (when-to-use, not just what-it-does) �
 ## Design
 
 ```
-traces/*.jsonl ──▶ mcp_trace.core (pure query functions, zero deps)
+traces/*.jsonl ──▶ agenthawk.core (pure query functions, zero deps)
                           │
-                   mcp_trace.server (thin MCPServer adapter, mcp 2.x)
+                   agenthawk.server (thin MCPServer adapter, mcp 2.x)
                           │
                     stdio (NDJSON JSON-RPC)
 ```
@@ -143,6 +146,7 @@ recursive, and query results redact obvious credential patterns.
 - live polling re-reads snapshots; it is not a push subscription
 - security audit can only report identity/provenance that the trace producer records
 - read-only tools; trace mutation (annotations) is roadmap
+- `mcp_trace` remains the compatibility Python import; new code should use `agenthawk`
 
 ## License
 

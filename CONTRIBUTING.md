@@ -1,4 +1,4 @@
-# Contributing to mcp-trace
+# Contributing to AgentHawk
 
 ## Development setup
 

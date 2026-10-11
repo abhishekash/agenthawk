@@ -1,4 +1,7 @@
-"""mcp-trace: MCP server over trace query core."""
+"""AgentHawk: MCP server over trace query core.
+
+The ``mcp_trace`` import remains as a compatibility module for pre-0.2 users.
+"""
 from mcp_trace.core import (
     approval_log,
     compare_runs,
@@ -17,7 +20,7 @@ from mcp_trace.core import (
     tool_stats,
 )
 
-__version__ = "0.1.1"
+__version__ = "0.2.0"
 __all__ = [
     "approval_log",
     "compare_runs",
