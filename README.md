@@ -4,11 +4,17 @@
 
 [![CI](https://github.com/abhishekash/agenthawk/actions/workflows/ci.yml/badge.svg)](https://github.com/abhishekash/agenthawk/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-**Agents that can debug themselves.** An MCP server that exposes your agent runs — stored as plain OpenTelemetry JSONL span files — as queryable tools: runs, span trees, failures, tool health, security evidence, live activity, regressions, human-approval logs, token/cost usage.
+AgentHawk is a small, local-first stdio MCP server for querying JSONL
+OpenTelemetry spans emitted by agent runs. It exposes focused queries for
+run summaries, tool failures, approvals, activity, and comparisons instead of
+requiring an application-specific dashboard.
 
-The idea: observability shouldn't be a dashboard you read after the fact. It should be *tools your agent can call mid-run* — "why was I slow yesterday?", "what did the human deny me last time?", "which tool keeps timing out?" — or query interactively from Claude Desktop / pi / any MCP client.
-
-Pairs with [agent-harness](https://github.com/abhishekash/agent-harness) (which writes the traces), but the reader is format-simple: any JSONL of OTel-shaped spans works.
+It pairs with [agent-harness](https://github.com/abhishekash/agent-harness),
+but the reader is format-simple: any JSONL of OTel-shaped spans works. The
+project's concrete origin was a shell-boundary regression: the harness blocked
+`cat ../outside.txt`, but the old trace recorded only that `run_shell` was
+called, not the returned diagnostic. AgentHawk and the harness now preserve and
+query that bounded error.
 
 ## AI-native use cases
 
@@ -36,7 +42,7 @@ cd agenthawk && uv pip install -e .
 agenthawk --trace-dir ./traces
 ```
 
-The `agenthawk` 0.2.0 release is the renamed successor to the published
+The `agenthawk` 0.2.1 release is the renamed successor to the published
 [`abhishekash-mcp-trace` 0.1.1](https://pypi.org/project/abhishekash-mcp-trace/0.1.1/)
 distribution. Existing clients can continue using the legacy command while
 migrating.
@@ -119,26 +125,9 @@ traces/*.jsonl ──▶ agenthawk.core (pure query functions, zero deps)
 - **core/server split**: all logic is pure functions over parsed spans; the MCP layer only parses args and JSON-encodes results. Tests hit both layers.
 - **trace_id prefixes**: agents fumble full 32-char hex ids; every tool accepts prefixes.
 - **bounded output**: diagnostics are truncated and obvious credentials are redacted before query results leave the server.
+- **honest cost totals**: `token_usage` returns `cost_known: false` and a null cost when any producer marks pricing as unavailable; unknown pricing is never presented as `$0`.
 - **cursor polling**: `recent_activity` makes the snapshot reader useful while a run is still writing spans.
 - The demo fixture ([`examples/example_trace.jsonl`](examples/example_trace.jsonl)) is a *real* agent-harness run, not hand-written.
-
-## Research-driven gaps addressed
-
-A small Reddit review surfaced the same production problems repeatedly: auth and
-identity are unclear after the demo, versions and logs are hard to compare,
-tool fleets become noisy and expensive, operators lack visibility into what is
-happening, and raw logs are not a useful analysis surface. Examples:
-
-- [ChatGPT + MCP gets painful after the demo](https://www.reddit.com/r/ChatGPTPro/comments/1uz6tzs/where_chatgpt_mcp_gets_painful_after_the_demo/) — auth, versions, logs, and safe tools.
-- [MCP logging and correlation IDs](https://www.reddit.com/r/softwarearchitecture/comments/1r2wnfd/is_mcp_effectively_introducing_a_probabilistic/o51k4zq/) — preserve intent, tool arguments, results, and correlation IDs.
-- [180 tools becomes a permission/context/debugging problem](https://www.reddit.com/r/ClaudeAI/comments/1tuqqpn/i_ship_ai_agents_in_production_the_mess_is_mcp/opbh78y/).
-- [MCP security](https://www.reddit.com/r/cybersecurity/comments/1tgs4gg/mcp_security/) — identity, access, credentials, approved versions, and audit logs.
-- [Raw logs are noisy and hard to query](https://www.reddit.com/r/ChatGPTPro/comments/1ur2tx4/i_made_my_codex_usage_tracker_more_agentnative/).
-
-This update adds five focused query surfaces rather than pretending a
-Dashboard solves those problems: `failure_report`, `tool_stats`,
-`security_audit`, `recent_activity`, and `compare_runs`. Trace discovery is also
-recursive, and query results redact obvious credential patterns.
 
 ## Honest limitations
 

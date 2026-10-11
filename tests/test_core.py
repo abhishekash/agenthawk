@@ -104,6 +104,15 @@ class TestTokenUsage:
         assert usage["llm_calls"] == 5
         assert usage["input_tokens"] == 92 + 94 + 125 + 132 + 196
         assert usage["output_tokens"] > 0
+        assert usage["cost_known"] is True
+
+    def test_unknown_cost_is_not_reported_as_zero(self, spans):
+        unknown = dict(spans[0])
+        unknown["attributes"] = dict(unknown["attributes"])
+        unknown["attributes"]["llm.cost_known"] = False
+        usage = core.token_usage([unknown])
+        assert usage["cost_known"] is False
+        assert usage["cost_usd"] is None
 
 
 class TestNewQueries:

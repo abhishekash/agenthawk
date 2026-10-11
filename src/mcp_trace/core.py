@@ -263,6 +263,7 @@ def token_usage(spans: list[dict[str, Any]]) -> dict[str, Any]:
     """Aggregate token + cost accounting across llm.complete spans."""
     in_tok = out_tok = 0
     cost = 0.0
+    cost_known = True
     calls = 0
     for s in spans:
         if s["name"] != "llm.complete":
@@ -270,13 +271,17 @@ def token_usage(spans: list[dict[str, Any]]) -> dict[str, Any]:
         calls += 1
         in_tok += int(s["attributes"].get("llm.usage.input_tokens", 0))
         out_tok += int(s["attributes"].get("llm.usage.output_tokens", 0))
-        cost += float(s["attributes"].get("llm.cost_usd", 0.0))
+        attrs = s["attributes"]
+        cost += float(attrs.get("llm.cost_usd", 0.0))
+        if attrs.get("llm.cost_known", True) is False:
+            cost_known = False
     return {
         "llm_calls": calls,
         "input_tokens": in_tok,
         "output_tokens": out_tok,
         "total_tokens": in_tok + out_tok,
-        "cost_usd": round(cost, 8),
+        "cost_usd": round(cost, 8) if cost_known else None,
+        "cost_known": cost_known,
     }
 
 
