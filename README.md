@@ -1,6 +1,6 @@
 # AgentHawk
 
-<!-- mcp-name: io.github.abhishekash/agenthawk -->
+<!-- mcp-name: io.github.abhishekash/mcp-trace-inspector -->
 
 [![CI](https://github.com/abhishekash/mcp-trace-inspector/actions/workflows/ci.yml/badge.svg)](https://github.com/abhishekash/mcp-trace-inspector/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 

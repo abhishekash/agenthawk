@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "agenthawk"
-version = "0.2.1"
+version = "0.2.2"
 description = "Agent observability MCP server for querying OpenTelemetry traces, failures, tool health, security evidence, and regressions."
 readme = "README.md"
 license = { text = "MIT" }
