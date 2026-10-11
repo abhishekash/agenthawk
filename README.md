@@ -32,8 +32,6 @@ The tools read stored traces and can poll files being written, but they do not p
 
 ## Install & run
 
-AgentHawk is the new canonical name. The legacy `abhishekash-mcp-trace` distribution and `mcp-trace` commands remain compatibility aliases for existing users.
-
 ```bash
 uvx agenthawk --trace-dir ./traces
 # or, for local development:
@@ -41,11 +39,6 @@ git clone https://github.com/abhishekash/agenthawk
 cd agenthawk && uv pip install -e .
 agenthawk --trace-dir ./traces
 ```
-
-The `agenthawk` 0.2.1 release is the renamed successor to the published
-[`abhishekash-mcp-trace` 0.1.1](https://pypi.org/project/abhishekash-mcp-trace/0.1.1/)
-distribution. Existing clients can continue using the legacy command while
-migrating.
 
 ## Client configuration
 
