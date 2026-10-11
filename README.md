@@ -2,7 +2,7 @@
 
 <!-- mcp-name: io.github.abhishekash/agenthawk -->
 
-[![CI](https://github.com/abhishekash/agenthawk/actions/workflows/ci.yml/badge.svg)](https://github.com/abhishekash/agenthawk/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![CI](https://github.com/abhishekash/mcp-trace-inspector/actions/workflows/ci.yml/badge.svg)](https://github.com/abhishekash/mcp-trace-inspector/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 AgentHawk is a small, local-first stdio MCP server for querying JSONL
 OpenTelemetry spans emitted by agent runs. It exposes focused queries for
@@ -35,8 +35,8 @@ The tools read stored traces and can poll files being written, but they do not p
 ```bash
 uvx agenthawk --trace-dir ./traces
 # or, for local development:
-git clone https://github.com/abhishekash/agenthawk
-cd agenthawk && uv pip install -e .
+git clone https://github.com/abhishekash/mcp-trace-inspector
+cd mcp-trace-inspector && uv pip install -e .
 agenthawk --trace-dir ./traces
 ```
 

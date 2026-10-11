@@ -4,7 +4,7 @@
   "title": "AgentHawk",
   "description": "Query OpenTelemetry traces from agent runs through MCP.",
   "repository": {
-    "url": "https://github.com/abhishekash/agenthawk",
+    "url": "https://github.com/abhishekash/mcp-trace-inspector",
     "source": "github"
   },
   "version": "0.2.1",

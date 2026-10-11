@@ -51,8 +51,8 @@ directory.
 For a local development install:
 
 ```bash
-git clone https://github.com/abhishekash/agenthawk.git
-cd agenthawk
+git clone https://github.com/abhishekash/mcp-trace-inspector.git
+cd mcp-trace-inspector
 uv pip install -e .
 agenthawk --trace-dir /absolute/path/to/traces
 ```
@@ -103,7 +103,7 @@ With the AgentHawk repository checked out locally, run the server directly:
 {
   "mcpServers": {
     "agenthawk": {
-      "command": "/absolute/path/to/agenthawk/.venv/bin/agenthawk",
+      "command": "/absolute/path/to/mcp-trace-inspector/.venv/bin/agenthawk",
       "args": ["--trace-dir", "/absolute/path/to/traces"]
     }
   }
