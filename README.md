@@ -28,7 +28,7 @@ query that bounded error.
 | "What is happening in the run right now?" | `recent_activity` | Cursor-based polling of newly written spans. |
 | "Did this model/version regress?" | `compare_runs` | Cost, latency, tokens, tool calls, and failure deltas. |
 
-The tools read stored traces and can poll files being written, but they do not push events or infer intent from the final answer. See the [real trace fixture](examples/example_trace.jsonl) and the [tool descriptions](src/mcp_trace/server.py) for the exact query contract.
+The tools read stored traces and can poll files being written, but they do not push events or infer intent from the final answer. Start with the [installation and user guide](docs/user-guide.md), then see the [real trace fixture](examples/example_trace.jsonl) and the [tool descriptions](src/mcp_trace/server.py) for the query contract.
 
 ## Install & run
 
