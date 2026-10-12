@@ -1,10 +1,10 @@
-# AgentHawk
+# mcp-trace-inspector
 
 <!-- mcp-name: io.github.abhishekash/mcp-trace-inspector -->
 
 [![CI](https://github.com/abhishekash/mcp-trace-inspector/actions/workflows/ci.yml/badge.svg)](https://github.com/abhishekash/mcp-trace-inspector/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-AgentHawk is a small, local-first stdio MCP server for querying JSONL
+mcp-trace-inspector is a small, local-first stdio MCP server for querying JSONL
 OpenTelemetry spans emitted by agent runs. It exposes focused queries for
 run summaries, tool failures, approvals, activity, and comparisons instead of
 requiring an application-specific dashboard.
@@ -13,7 +13,7 @@ It pairs with [agent-harness](https://github.com/abhishekash/agent-harness),
 but the reader is format-simple: any JSONL of OTel-shaped spans works. The
 project's concrete origin was a shell-boundary regression: the harness blocked
 `cat ../outside.txt`, but the old trace recorded only that `run_shell` was
-called, not the returned diagnostic. AgentHawk and the harness now preserve and
+called, not the returned diagnostic. mcp-trace-inspector and the harness now preserve and
 query that bounded error.
 
 ## AI-native use cases
