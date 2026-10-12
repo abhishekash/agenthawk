@@ -9,6 +9,10 @@ OpenTelemetry spans emitted by agent runs. It exposes focused queries for
 run summaries, tool failures, approvals, activity, and comparisons instead of
 requiring an application-specific dashboard.
 
+> **Release status:** The `0.3.0` GitHub release is available, but the new PyPI
+> distribution is pending Trusted Publisher registration. Until publication
+> succeeds, install from this checkout; `uvx mcp-trace-inspector` will not work.
+
 It pairs with [agent-harness](https://github.com/abhishekash/agent-harness),
 but the reader is format-simple: any JSONL of OTel-shaped spans works. The
 project's concrete origin was a shell-boundary regression: the harness blocked

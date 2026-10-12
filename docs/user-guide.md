@@ -35,8 +35,8 @@ export adapter to map their OTel export format into these JSONL span records.
 
 ## Install and start
 
-The simplest option is `uvx`, which runs the published package without a
-project checkout:
+After the new distribution is published to PyPI, `uvx` will run it without a
+project checkout (see the [release status](../README.md)):
 
 ```bash
 uvx --from mcp-trace-inspector==0.3.0 mcp-trace-inspector --trace-dir /absolute/path/to/traces
