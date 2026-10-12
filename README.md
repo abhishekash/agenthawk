@@ -33,11 +33,11 @@ The tools read stored traces and can poll files being written, but they do not p
 ## Install & run
 
 ```bash
-uvx agenthawk --trace-dir ./traces
+uvx mcp-trace-inspector --trace-dir ./traces
 # or, for local development:
 git clone https://github.com/abhishekash/mcp-trace-inspector
 cd mcp-trace-inspector && uv pip install -e .
-agenthawk --trace-dir ./traces
+mcp-trace-inspector --trace-dir ./traces
 ```
 
 ## Client configuration
@@ -49,7 +49,7 @@ agenthawk --trace-dir ./traces
   "mcpServers": {
     "agent-traces": {
       "command": "uvx",
-      "args": ["agenthawk", "--trace-dir", "/path/to/traces"]
+      "args": ["mcp-trace-inspector", "--trace-dir", "/path/to/traces"]
     }
   }
 }
@@ -62,7 +62,7 @@ agenthawk --trace-dir ./traces
   "mcpServers": {
     "agent-traces": {
       "command": "uvx",
-      "args": ["agenthawk", "--trace-dir", "/path/to/traces"]
+      "args": ["mcp-trace-inspector", "--trace-dir", "/path/to/traces"]
     }
   }
 }
@@ -71,7 +71,7 @@ agenthawk --trace-dir ./traces
 **agent-harness** (mounted as gated tools):
 
 ```bash
-harness run "Why was my last run slow?" --mcp "uvx agenthawk --trace-dir ./traces"
+harness run "Why was my last run slow?" --mcp "uvx mcp-trace-inspector --trace-dir ./traces"
 ```
 
 ## Tools
@@ -108,9 +108,9 @@ Tool descriptions are written as prompts (when-to-use, not just what-it-does) �
 ## Design
 
 ```
-traces/*.jsonl ──▶ agenthawk.core (pure query functions, zero deps)
+traces/*.jsonl ──▶ mcp_trace.core (pure query functions, zero deps)
                           │
-                   agenthawk.server (thin MCPServer adapter, mcp 2.x)
+                   mcp_trace.server (thin MCPServer adapter, mcp 2.x)
                           │
                     stdio (NDJSON JSON-RPC)
 ```
@@ -128,7 +128,7 @@ traces/*.jsonl ──▶ agenthawk.core (pure query functions, zero deps)
 - live polling re-reads snapshots; it is not a push subscription
 - security audit can only report identity/provenance that the trace producer records
 - read-only tools; trace mutation (annotations) is roadmap
-- `mcp_trace` remains the compatibility Python import; new code should use `agenthawk`
+- The Python query and server modules are available as `mcp_trace`; older import and command aliases remain for existing clients.
 
 ## License
 

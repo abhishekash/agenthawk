@@ -1,9 +1,18 @@
 """Server-level tests: tools callable via the FastMCP app's tool manager."""
 import json
+from importlib.metadata import distribution
 
 import pytest
 
 import mcp_trace.server as server
+
+
+def test_distribution_exposes_repository_named_command():
+    package = distribution("mcp-trace-inspector")
+    assert package.version == "0.3.0"
+    scripts = {ep.name: ep.value for ep in package.entry_points if ep.group == "console_scripts"}
+    assert scripts["mcp-trace-inspector"] == "mcp_trace.server:main"
+    assert scripts["agenthawk"] == scripts["mcp-trace-inspector"]
 
 
 @pytest.fixture(autouse=True)

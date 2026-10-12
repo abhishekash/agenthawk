@@ -18,7 +18,7 @@ from mcp.server.mcpserver import MCPServer
 from mcp_trace import core
 
 mcp = MCPServer(
-    "agenthawk",
+    "mcp-trace-inspector",
     instructions=(
         "Query OpenTelemetry traces of agent runs (JSONL span files). "
         "Use list_runs to see recent runs, run_summary/span_tree to inspect one, "

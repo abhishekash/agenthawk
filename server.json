@@ -7,13 +7,13 @@
     "url": "https://github.com/abhishekash/mcp-trace-inspector",
     "source": "github"
   },
-  "version": "0.2.2",
+  "version": "0.3.0",
   "packages": [
     {
       "registryType": "pypi",
       "registryBaseUrl": "https://pypi.org",
-      "identifier": "agenthawk",
-      "version": "0.2.2",
+      "identifier": "mcp-trace-inspector",
+      "version": "0.3.0",
       "runtimeHint": "uvx",
       "transport": {
         "type": "stdio"

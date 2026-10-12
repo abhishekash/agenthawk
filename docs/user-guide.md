@@ -39,7 +39,7 @@ The simplest option is `uvx`, which runs the published package without a
 project checkout:
 
 ```bash
-uvx --from agenthawk==0.2.2 agenthawk --trace-dir /absolute/path/to/traces
+uvx --from mcp-trace-inspector==0.3.0 mcp-trace-inspector --trace-dir /absolute/path/to/traces
 ```
 
 The server speaks MCP over standard input and output, so this command waits for
@@ -54,13 +54,13 @@ For a local development install:
 git clone https://github.com/abhishekash/mcp-trace-inspector.git
 cd mcp-trace-inspector
 uv pip install -e .
-agenthawk --trace-dir /absolute/path/to/traces
+mcp-trace-inspector --trace-dir /absolute/path/to/traces
 ```
 
 You can also set `MCP_TRACE_DIR` and omit `--trace-dir`:
 
 ```bash
-MCP_TRACE_DIR=/absolute/path/to/traces uvx --from agenthawk==0.2.2 agenthawk
+MCP_TRACE_DIR=/absolute/path/to/traces uvx --from mcp-trace-inspector==0.3.0 mcp-trace-inspector
 ```
 
 The server is local and read-only. Connecting an MCP client gives that client
@@ -82,8 +82,8 @@ For clients using the `mcpServers` JSON format, the entry looks like this:
       "command": "uvx",
       "args": [
         "--from",
-        "agenthawk==0.2.2",
-        "agenthawk",
+        "mcp-trace-inspector==0.3.0",
+        "mcp-trace-inspector",
         "--trace-dir",
         "/absolute/path/to/traces"
       ]
@@ -103,7 +103,7 @@ With the mcp-trace-inspector repository checked out locally, run the server dire
 {
   "mcpServers": {
     "mcp-trace-inspector": {
-      "command": "/absolute/path/to/mcp-trace-inspector/.venv/bin/agenthawk",
+      "command": "/absolute/path/to/mcp-trace-inspector/.venv/bin/mcp-trace-inspector",
       "args": ["--trace-dir", "/absolute/path/to/traces"]
     }
   }
@@ -111,7 +111,7 @@ With the mcp-trace-inspector repository checked out locally, run the server dire
 ```
 
 On Windows, use the executable path from your virtual environment, commonly
-`C:\\path\\to\\mcp-trace-inspector\\.venv\\Scripts\\agenthawk.exe`.
+`C:\\path\\to\\mcp-trace-inspector\\.venv\\Scripts\\mcp-trace-inspector.exe`.
 
 ## First questions to ask
 
@@ -154,7 +154,7 @@ mcp-trace-inspector can run as a stdio MCP server mounted by `agent-harness`:
 
 ```bash
 harness run "Inspect the last run and explain its failure" \
-  --mcp "uvx --from agenthawk==0.2.2 agenthawk --trace-dir ./traces" \
+  --mcp "uvx --from mcp-trace-inspector==0.3.0 mcp-trace-inspector --trace-dir ./traces" \
   --approve cli
 ```
 

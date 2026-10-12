@@ -3,8 +3,8 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "agenthawk"
-version = "0.2.2"
+name = "mcp-trace-inspector"
+version = "0.3.0"
 description = "Agent observability MCP server for querying OpenTelemetry traces, failures, tool health, security evidence, and regressions."
 readme = "README.md"
 license = { text = "MIT" }
@@ -26,6 +26,7 @@ dependencies = [
 dev = ["pytest>=8"]
 
 [project.scripts]
+mcp-trace-inspector = "mcp_trace.server:main"
 agenthawk = "mcp_trace.server:main"
 agent-hawk = "mcp_trace.server:main"
 mcp-trace = "mcp_trace.server:main"
