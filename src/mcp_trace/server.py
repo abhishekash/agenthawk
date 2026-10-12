@@ -159,5 +159,5 @@ def main() -> None:
     )
     args = parser.parse_args()
     _trace_dir = Path(args.trace_dir).resolve()
-    print(f"AgentHawk serving traces from {_trace_dir}", file=sys.stderr)
+    print(f"mcp-trace-inspector serving traces from {_trace_dir}", file=sys.stderr)
     mcp.run(transport="stdio")

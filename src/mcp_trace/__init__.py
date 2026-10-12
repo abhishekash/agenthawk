@@ -1,4 +1,4 @@
-"""AgentHawk: MCP server over trace query core.
+"""mcp-trace-inspector: MCP server over trace query core.
 
 The ``mcp_trace`` import remains as a compatibility module for pre-0.2 users.
 """

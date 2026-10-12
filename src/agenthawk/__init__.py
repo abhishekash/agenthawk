@@ -1,4 +1,4 @@
-"""AgentHawk public import surface.
+"""mcp-trace-inspector public import surface.
 
 The implementation remains in ``mcp_trace`` so existing integrations keep
 working. New code may import the query functions from ``agenthawk``.

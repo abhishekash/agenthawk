@@ -1,4 +1,4 @@
-"""AgentHawk MCP server entry point."""
+"""mcp-trace-inspector MCP server entry point."""
 from mcp_trace.server import *  # noqa: F401,F403
 from mcp_trace.server import main
 

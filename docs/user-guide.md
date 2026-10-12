@@ -1,12 +1,12 @@
-# AgentHawk user guide
+# mcp-trace-inspector user guide
 
-AgentHawk lets an MCP client ask questions about an agent's recorded traces.
+mcp-trace-inspector lets an MCP client ask questions about an agent's recorded traces.
 Point it at a directory of JSONL span records, connect it to an MCP client, and
 ask about a run's tool calls, failures, approvals, timing, or token usage.
 
 ## What it helps with
 
-Use AgentHawk when you want to:
+Use mcp-trace-inspector when you want to:
 
 - Find a slow model or tool call without reading every trace line.
 - See recorded tool failures and bounded diagnostic messages.
@@ -14,7 +14,7 @@ Use AgentHawk when you want to:
 - Compare recorded latency, tokens, tool calls, and failures across runs.
 - Keep traces on your own machine and query them from an MCP-capable client.
 
-AgentHawk is a read-only trace viewer. It does not run, change, retry, or stop
+mcp-trace-inspector is a read-only trace viewer. It does not run, change, retry, or stop
 the agent being observed. Live activity is returned by polling the trace files;
 there is no push stream. Results describe evidence in the traces. Missing
 identity or approval fields mean the producer did not record that evidence;
@@ -24,7 +24,7 @@ they do not prove a person or policy authorized an action.
 
 - Python 3.11 or newer.
 - An MCP client that can launch a local stdio server.
-- JSONL traces in AgentHawk's OTel-shaped span format. The reader expects each
+- JSONL traces in the project's OTel-shaped span format. The reader expects each
   line to contain a span with `trace_id`, `span_id`, `name`,
   `start_unix_nano`, `end_unix_nano`, `attributes`, and, where available,
   `parent_span_id`, `status`, and `events`. Tool, model, and approval details
@@ -78,7 +78,7 @@ For clients using the `mcpServers` JSON format, the entry looks like this:
 ```json
 {
   "mcpServers": {
-    "agenthawk": {
+    "mcp-trace-inspector": {
       "command": "uvx",
       "args": [
         "--from",
@@ -97,12 +97,12 @@ example, clients can place MCP server entries in user-level or project-level
 settings. Use an absolute trace path so the server does not depend on the
 client's working directory.
 
-With the AgentHawk repository checked out locally, run the server directly:
+With the mcp-trace-inspector repository checked out locally, run the server directly:
 
 ```json
 {
   "mcpServers": {
-    "agenthawk": {
+    "mcp-trace-inspector": {
       "command": "/absolute/path/to/mcp-trace-inspector/.venv/bin/agenthawk",
       "args": ["--trace-dir", "/absolute/path/to/traces"]
     }
@@ -150,7 +150,7 @@ evidence in its answer so you can check the result against the source data.
 
 ## Connect agent-harness
 
-AgentHawk can run as a stdio MCP server mounted by `agent-harness`:
+mcp-trace-inspector can run as a stdio MCP server mounted by `agent-harness`:
 
 ```bash
 harness run "Inspect the last run and explain its failure" \
@@ -166,14 +166,14 @@ and approval documentation for its current policy options.
 
 **The client says the server is unavailable.** Confirm that `uvx` is installed,
 the package can be fetched, and the configured trace path exists. Reload the
-client's MCP configuration and check its server logs; AgentHawk writes its
+client's MCP configuration and check its server logs; the server writes its
 startup message to standard error.
 
-**AgentHawk finds no runs.** Check that the path points to a directory
+**No runs appear.** Check that the path points to a directory
 containing `.jsonl` files. The server searches subdirectories. The included
 example is at `examples/example_trace.jsonl` in the repository.
 
-**Runs appear, but model or approval details are missing.** AgentHawk only
+**Runs appear, but model or approval details are missing.** The server only
 reports fields present in the trace. Check whether your producer exports model
 names, token counts, cost-known status, tool call spans, and approval events.
 Missing fields are not inferred from the final answer.
@@ -184,7 +184,7 @@ Ask your tracing exporter to produce one span object per line.
 
 ## Privacy and limits
 
-AgentHawk processes the files in the configured directory and returns selected
+mcp-trace-inspector processes the files in the configured directory and returns selected
 trace fields to the connected MCP client. Failure messages are bounded and
 credential patterns are redacted, but redaction is not a guarantee that every
 private value is removed. Review trace contents and client access before using
@@ -197,7 +197,7 @@ are unknown when the trace producer does not provide reliable pricing.
 
 ## Example data
 
-Try AgentHawk against the checked-in
+Try mcp-trace-inspector against the checked-in
 [example trace](../examples/example_trace.jsonl). It contains a run emitted by
 `agent-harness` and can be queried using the tools above.
 
