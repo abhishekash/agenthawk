@@ -19,8 +19,13 @@ publisher for `spanhound` is active with:
 
 `v0.4.0` reached PyPI but its Registry
 publish was rejected because the description exceeded the Registry's 100-character
-limit. `v0.4.1` fixed that and is live on [PyPI](https://pypi.org/project/spanhound/0.4.1/)
-and the [MCP Registry](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.abhishekash%2Fspanhound/versions).
+limit. `v0.4.1` fixed that. `v0.4.2` is live on
+[PyPI](https://pypi.org/project/spanhound/0.4.2/) and the
+[MCP Registry](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.abhishekash%2Fspanhound/versions).
+It adds `spanhound demo` and a validated
+[MCP Bundle](https://github.com/abhishekash/spanhound/releases/download/v0.4.2/spanhound-v0.4.2.mcpb)
+for desktop clients. The public PyPI wheel and extracted bundle were both
+smoke-tested against the recorded regression trace.
 The workflow now validates Registry metadata before uploading to PyPI.
 
 ## Directories
