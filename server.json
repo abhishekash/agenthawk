@@ -2,18 +2,18 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.abhishekash/spanhound",
   "title": "SpanHound",
-  "description": "Read local agent JSONL and OTLP JSON traces through MCP for failures, approvals, and run comparisons.",
+  "description": "Read local JSONL and OTLP JSON agent traces for failures, approvals, and run comparisons.",
   "repository": {
     "url": "https://github.com/abhishekash/spanhound",
     "source": "github"
   },
-  "version": "0.4.0",
+  "version": "0.4.1",
   "packages": [
     {
       "registryType": "pypi",
       "registryBaseUrl": "https://pypi.org",
       "identifier": "spanhound",
-      "version": "0.4.0",
+      "version": "0.4.1",
       "runtimeHint": "uvx",
       "transport": {
         "type": "stdio"
