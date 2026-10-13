@@ -35,11 +35,11 @@ export adapter to map their OTel export format into these JSONL span records.
 
 ## Install and start
 
-Until the new distribution is published to PyPI, `uvx` can run the tagged Git
-source without a project checkout (see the [release status](../README.md)):
+Run the [published package](https://pypi.org/project/mcp-trace-inspector/)
+without a project checkout:
 
 ```bash
-uvx --from git+https://github.com/abhishekash/mcp-trace-inspector@v0.3.0 mcp-trace-inspector --trace-dir /absolute/path/to/traces
+uvx mcp-trace-inspector --trace-dir /absolute/path/to/traces
 ```
 
 The server speaks MCP over standard input and output, so this command waits for
@@ -56,14 +56,14 @@ cd mcp-trace-inspector
 uvx --from . mcp-trace-inspector --trace-dir /absolute/path/to/traces
 ```
 
-Run `uvx --from . mcp-trace-inspector --trace-dir examples --check` from the
+Run `uvx mcp-trace-inspector --trace-dir examples --check` from the
 repository to validate the included fixture and print its run summary without
 starting an MCP client.
 
 You can also set `MCP_TRACE_DIR` and omit `--trace-dir`:
 
 ```bash
-MCP_TRACE_DIR=/absolute/path/to/traces uvx --from git+https://github.com/abhishekash/mcp-trace-inspector@v0.3.0 mcp-trace-inspector
+MCP_TRACE_DIR=/absolute/path/to/traces uvx mcp-trace-inspector
 ```
 
 The server is local and read-only. Connecting an MCP client gives that client
@@ -84,8 +84,6 @@ For clients using the `mcpServers` JSON format, the entry looks like this:
     "mcp-trace-inspector": {
       "command": "uvx",
       "args": [
-        "--from",
-        "git+https://github.com/abhishekash/mcp-trace-inspector@v0.3.0",
         "mcp-trace-inspector",
         "--trace-dir",
         "/absolute/path/to/traces"
@@ -157,7 +155,7 @@ mcp-trace-inspector can run as a stdio MCP server mounted by `agent-harness`:
 
 ```bash
 harness run "Inspect the last run and explain its failure" \
-  --mcp "uvx --from git+https://github.com/abhishekash/mcp-trace-inspector@v0.3.0 mcp-trace-inspector --trace-dir ./traces" \
+  --mcp "uvx mcp-trace-inspector --trace-dir ./traces" \
   --approve cli
 ```
 

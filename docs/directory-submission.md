@@ -1,12 +1,12 @@
 # Directory submission handoff
 
-Status checked 2026-10-13. The server is public and installable from its `v0.3.0` Git tag. The [official MCP Registry namespace](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.abhishekash%2Fmcp-trace-inspector/versions) is active at `0.2.2`, backed by the earlier PyPI distribution. The `0.3.0` [`server.json`](../server.json) passes `mcp-publisher validate`.
+Status checked 2026-10-13. The first renamed release, `0.3.0`, is live on [PyPI](https://pypi.org/project/mcp-trace-inspector/) and in the [official MCP Registry namespace](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.abhishekash%2Fmcp-trace-inspector/versions). Its [publishing run](https://github.com/abhishekash/mcp-trace-inspector/actions/runs/38406794634) passed both upload jobs.
 
-## Publish the renamed PyPI distribution and update the MCP Registry
+## Publishing handoff
 
 The `v0.3.0` release's [PyPI workflow](https://github.com/abhishekash/mcp-trace-inspector/actions/runs/38255591475) built successfully, then PyPI rejected its upload: `403 Invalid API Token: OIDC scoped token is not valid for project 'mcp-trace-inspector'`. A [retry](https://github.com/abhishekash/mcp-trace-inspector/actions/runs/38402523257) failed the same way. The Registry job was skipped because it depends on that upload.
 
-The PyPI account already has an empty `mcp-trace-inspector` project. Its former `publish-pypi.yml` publisher overlapped with a publisher for `agenthawk` that used the same GitHub repository and workflow. A distinct **project Trusted Publisher** has now been added to `mcp-trace-inspector` with these fields:
+The former `publish-pypi.yml` publisher overlapped with a publisher for `agenthawk` that used the same GitHub repository and workflow. A distinct **project Trusted Publisher** was added to `mcp-trace-inspector` with these fields:
 
 | Field | Value |
 |---|---|
@@ -15,7 +15,7 @@ The PyPI account already has an empty `mcp-trace-inspector` project. Its former 
 | Workflow filename | `publish-mcp-trace-inspector.yml` |
 | Environment | `pypi` |
 
-The remaining release step is to dispatch [`publish-mcp-trace-inspector.yml`](../.github/workflows/publish-mcp-trace-inspector.yml) with `tag=v0.3.0`. It checks out that tag, uploads the distribution, and publishes its Registry metadata after upload succeeds. Future releases use this workflow automatically. Verify both the [PyPI project](https://pypi.org/project/mcp-trace-inspector/) and [Registry namespace](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.abhishekash%2Fmcp-trace-inspector/versions) afterward.
+The `v0.3.0` tag was published by manually dispatching [`publish-mcp-trace-inspector.yml`](../.github/workflows/publish-mcp-trace-inspector.yml). Future GitHub releases trigger the same workflow automatically. Verify both the PyPI project and Registry namespace after each release.
 
 ## `awesome-mcp-servers` submission
 

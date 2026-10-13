@@ -29,7 +29,7 @@ query that bounded error.
 ```bash
 git clone https://github.com/abhishekash/mcp-trace-inspector.git
 cd mcp-trace-inspector
-uvx --from . mcp-trace-inspector --trace-dir examples --check
+uvx mcp-trace-inspector --trace-dir examples --check
 ```
 
 `--check` prints JSON with the trace directory, span count, and recent run
@@ -37,12 +37,8 @@ summaries, then exits. It also reports a missing directory or malformed complete
 JSONL record. To ask questions through MCP, connect a client using the
 [configuration below](#client-configuration).
 
-> **Release status:** The `0.3.0` GitHub release is available. The PyPI
-> Trusted Publisher is configured; its first upload has not completed. Run the
-> tagged Git source with `uvx` below until `uvx mcp-trace-inspector` is available.
-> The [MCP Registry entry](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.abhishekash%2Fmcp-trace-inspector/versions)
-> currently lists the earlier `0.2.2` package.
-> [Publication status and directory submission handoff](docs/directory-submission.md).
+Version `0.3.1` is available on [PyPI](https://pypi.org/project/mcp-trace-inspector/)
+and the [MCP Registry](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.abhishekash%2Fmcp-trace-inspector/versions).
 
 ## Where it fits
 
@@ -76,7 +72,7 @@ The tools read stored traces and can poll files being written, but they do not p
 ## Install & run
 
 ```bash
-uvx --from git+https://github.com/abhishekash/mcp-trace-inspector@v0.3.0 mcp-trace-inspector --trace-dir ./traces
+uvx mcp-trace-inspector --trace-dir ./traces
 # or, for local development:
 git clone https://github.com/abhishekash/mcp-trace-inspector
 cd mcp-trace-inspector
@@ -92,7 +88,7 @@ uvx --from . mcp-trace-inspector --trace-dir ./traces
   "mcpServers": {
     "agent-traces": {
       "command": "uvx",
-      "args": ["--from", "git+https://github.com/abhishekash/mcp-trace-inspector@v0.3.0", "mcp-trace-inspector", "--trace-dir", "/path/to/traces"]
+      "args": ["mcp-trace-inspector", "--trace-dir", "/path/to/traces"]
     }
   }
 }
@@ -105,7 +101,7 @@ uvx --from . mcp-trace-inspector --trace-dir ./traces
   "mcpServers": {
     "agent-traces": {
       "command": "uvx",
-      "args": ["--from", "git+https://github.com/abhishekash/mcp-trace-inspector@v0.3.0", "mcp-trace-inspector", "--trace-dir", "/path/to/traces"]
+      "args": ["mcp-trace-inspector", "--trace-dir", "/path/to/traces"]
     }
   }
 }
@@ -114,7 +110,7 @@ uvx --from . mcp-trace-inspector --trace-dir ./traces
 **agent-harness** (mounted as gated tools):
 
 ```bash
-harness run "Why was my last run slow?" --mcp "uvx --from git+https://github.com/abhishekash/mcp-trace-inspector@v0.3.0 mcp-trace-inspector --trace-dir ./traces"
+harness run "Why was my last run slow?" --mcp "uvx mcp-trace-inspector --trace-dir ./traces"
 ```
 
 ## Tools

@@ -44,8 +44,7 @@ The last two fields come from a `hitl.decision` event on that span. They describ
 Run [mcp-trace-inspector](https://github.com/abhishekash/mcp-trace-inspector) against the output directory:
 
 ```bash
-uvx --from git+https://github.com/abhishekash/mcp-trace-inspector@v0.3.0 \
-  mcp-trace-inspector --trace-dir /tmp/shell-root-escape-demo/traces
+uvx mcp-trace-inspector --trace-dir /tmp/shell-root-escape-demo/traces
 ```
 
 An MCP client can call `search_spans` with `needle: "shell path escapes"`. In the reproduced trace, it returns the `tool.call` span and the matching diagnostic. `failure_report` gives a broader view of failed calls; `approval_log` exposes the decision evidence. The inspector reads local JSONL spans and returns bounded, redacted query results. It does not watch the agent's screen or infer intent from the final answer.
