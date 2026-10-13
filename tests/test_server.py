@@ -1,5 +1,7 @@
 """Server-level tests: tools callable via the FastMCP app's tool manager."""
 import json
+import subprocess
+import sys
 from importlib.metadata import distribution
 
 import pytest
@@ -13,6 +15,18 @@ def test_distribution_exposes_repository_named_command():
     scripts = {ep.name: ep.value for ep in package.entry_points if ep.group == "console_scripts"}
     assert scripts["mcp-trace-inspector"] == "mcp_trace.server:main"
     assert scripts["agenthawk"] == scripts["mcp-trace-inspector"]
+
+
+def test_check_command_reports_example_runs():
+    result = subprocess.run(
+        [sys.executable, "-m", "mcp_trace", "--trace-dir", "examples", "--check"],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    report = json.loads(result.stdout)
+    assert report["spans"] > 0
+    assert report["runs"][0]["trace_id"]
 
 
 @pytest.fixture(autouse=True)
@@ -55,6 +69,7 @@ async def test_list_runs_tool():
     data = json.loads(result.content[0].text)
     assert len(data) == 1
     assert data[0]["model"] == "scripted"
+    assert data[0]["trace_id"] == "f920798dd2558fcb84f9977736432a8b"
 
 
 @pytest.mark.anyio
@@ -68,6 +83,17 @@ async def test_run_summary_accepts_prefix():
 async def test_unknown_trace_errors():
     with pytest.raises(Exception):
         await server.mcp.call_tool("run_summary", {"trace_id": "deadbeef"})
+
+
+@pytest.mark.anyio
+async def test_ambiguous_trace_prefix_errors():
+    original = (server._trace_dir / "demo.jsonl").read_text(encoding="utf-8")
+    (server._trace_dir / "second.jsonl").write_text(
+        original.replace("f920798dd2558fcb84f9977736432a8b", "f9200000000000000000000000000000"),
+        encoding="utf-8",
+    )
+    with pytest.raises(Exception, match="ambiguous"):
+        await server.mcp.call_tool("run_summary", {"trace_id": "f920"})
 
 
 @pytest.mark.anyio

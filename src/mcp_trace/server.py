@@ -14,6 +14,7 @@ import sys
 from pathlib import Path
 
 from mcp.server.mcpserver import MCPServer
+from mcp.server.mcpserver.exceptions import ToolError
 
 from mcp_trace import core
 
@@ -41,11 +42,14 @@ def _spans() -> list[dict]:
 
 
 def _resolve(trace_id: str) -> list[dict]:
-    spans = [s for s in _spans() if s["trace_id"].startswith(trace_id)]
-    if not spans:
-        known = ", ".join(t[:12] for t in core.group_traces(_spans())) or "(none)"
-        raise ValueError(f"no trace matching {trace_id!r}; known prefixes: {known}")
-    return spans
+    spans = _spans()
+    try:
+        return core._resolve_trace_prefix(spans, trace_id)[1]
+    except ValueError as exc:
+        if str(exc).startswith("no trace matching"):
+            known = ", ".join(t[:12] for t in core.group_traces(spans)) or "(none)"
+            raise ToolError(f"{exc}; known prefixes: {known}") from exc
+        raise ToolError(str(exc)) from exc
 
 
 def _dump(obj) -> str:
@@ -61,8 +65,6 @@ def list_runs(limit: int = 10) -> str:
     runs = core.list_runs(_spans(), limit=limit)
     if not runs:
         return f"No traces found in {_trace_dir}. Point --trace-dir at your harness traces."
-    for r in runs:
-        r["trace_id"] = r["trace_id"][:12] + "…"
     return _dump(runs)
 
 
@@ -146,7 +148,10 @@ def recent_activity(
 @mcp.tool()
 def compare_runs(trace_ids: list[str]) -> str:
     """Compare selected trace-id prefixes for latency, cost, tokens, tools, and failures."""
-    return _dump(core.compare_runs(_spans(), trace_ids))
+    try:
+        return _dump(core.compare_runs(_spans(), trace_ids))
+    except ValueError as exc:
+        raise ToolError(str(exc)) from exc
 
 
 def main() -> None:
@@ -157,7 +162,19 @@ def main() -> None:
         default=os.environ.get("MCP_TRACE_DIR", "./traces"),
         help="directory of JSONL span files (default: $MCP_TRACE_DIR or ./traces)",
     )
+    parser.add_argument(
+        "--check",
+        action="store_true",
+        help="validate the trace directory and print recent run summaries, then exit",
+    )
     args = parser.parse_args()
     _trace_dir = Path(args.trace_dir).resolve()
+    if args.check:
+        try:
+            spans = core.load_trace_dir(_trace_dir)
+        except (FileNotFoundError, ValueError) as exc:
+            parser.error(str(exc))
+        print(_dump({"trace_dir": str(_trace_dir), "spans": len(spans), "runs": core.list_runs(spans)}))
+        return
     print(f"mcp-trace-inspector serving traces from {_trace_dir}", file=sys.stderr)
     mcp.run(transport="stdio")
