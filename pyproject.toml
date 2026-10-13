@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "spanhound"
-version = "0.4.0"
+version = "0.4.1"
 description = "Read-only MCP queries for local agent JSONL and OTLP JSON traces, approvals, and failures."
 readme = "README.md"
 license = { text = "MIT" }

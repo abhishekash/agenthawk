@@ -17,7 +17,10 @@ new package, PyPI needs a pending publisher with:
 | Workflow filename | `publish-spanhound.yml` |
 | Environment | `pypi` |
 
-Once `v0.4.0` is published, check the [PyPI project](https://pypi.org/project/spanhound/)
+`v0.4.0` reached [PyPI](https://pypi.org/project/spanhound/) but its Registry
+publish was rejected because the description exceeded the Registry's 100-character
+limit. `v0.4.1` shortens the description and validates `server.json` before upload.
+After release, check the [PyPI project](https://pypi.org/project/spanhound/)
 and [Registry entry](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.abhishekash%2Fspanhound/versions).
 
 ## Directories
