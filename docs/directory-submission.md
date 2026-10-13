@@ -7,8 +7,8 @@ and server namespace are `spanhound` and `io.github.abhishekash/spanhound`.
 ## Release
 
 The release workflow publishes a tagged build to PyPI using a Trusted Publisher,
-then publishes the matching `server.json` to the official MCP Registry. For the
-new package, PyPI needs a pending publisher with:
+then publishes the matching `server.json` to the official MCP Registry. PyPI's
+publisher for `spanhound` is active with:
 
 | Field | Value |
 |---|---|
@@ -17,20 +17,20 @@ new package, PyPI needs a pending publisher with:
 | Workflow filename | `publish-spanhound.yml` |
 | Environment | `pypi` |
 
-`v0.4.0` reached [PyPI](https://pypi.org/project/spanhound/) but its Registry
+`v0.4.0` reached PyPI but its Registry
 publish was rejected because the description exceeded the Registry's 100-character
-limit. `v0.4.1` shortens the description and validates `server.json` before upload.
-After release, check the [PyPI project](https://pypi.org/project/spanhound/)
-and [Registry entry](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.abhishekash%2Fspanhound/versions).
+limit. `v0.4.1` fixed that and is live on [PyPI](https://pypi.org/project/spanhound/0.4.1/)
+and the [MCP Registry](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.abhishekash%2Fspanhound/versions).
+The workflow now validates Registry metadata before uploading to PyPI.
 
 ## Directories
 
 - The [awesome-mcp-servers PR](https://github.com/punkpeye/awesome-mcp-servers/pull/16323)
-  was submitted under the former name. Update its entry to `abhishekash/spanhound`
-  and mention local OTLP JSON exports before requesting review.
+  now lists `abhishekash/spanhound` and OTLP JSON support. Its automated check
+  passed; maintainer review remains pending.
 - The [Glama submission](https://glama.ai/mcp/servers) is pending review under the
-  former name. Ask Glama to update its name and repository URL after the GitHub
-  rename, or submit the new listing if their review process requires it.
+  former name. Its submitted GitHub URL redirects to SpanHound. The listing's
+  displayed name needs an update once Glama has reviewed it.
 
-Use the new name in outreach. The archived package and GitHub redirect are for
+Use the new name in outreach. The prior package and GitHub redirect are for
 existing links and installs.
