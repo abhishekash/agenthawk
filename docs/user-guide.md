@@ -53,9 +53,12 @@ For a local development install:
 ```bash
 git clone https://github.com/abhishekash/mcp-trace-inspector.git
 cd mcp-trace-inspector
-uv pip install -e .
-mcp-trace-inspector --trace-dir /absolute/path/to/traces
+uvx --from . mcp-trace-inspector --trace-dir /absolute/path/to/traces
 ```
+
+Run `uvx --from . mcp-trace-inspector --trace-dir examples --check` from the
+repository to validate the included fixture and print its run summary without
+starting an MCP client.
 
 You can also set `MCP_TRACE_DIR` and omit `--trace-dir`:
 
@@ -115,8 +118,8 @@ On Windows, use the executable path from your virtual environment, commonly
 
 ## First questions to ask
 
-Start with `list_runs` to find a recent trace. It returns a shortened trace ID;
-the other tools accept ID prefixes.
+Start with `list_runs` to find a recent trace. It returns full trace IDs; the
+other tools also accept unambiguous prefixes.
 
 Try these prompts in your MCP client:
 
@@ -135,7 +138,7 @@ evidence in its answer so you can check the result against the source data.
 
 | Tool | What it returns | Useful question |
 |---|---|---|
-| `list_runs` | Recent run summaries with shortened trace IDs | “What ran recently?” |
+| `list_runs` | Recent run summaries with full trace IDs | “What ran recently?” |
 | `run_summary` | Task, model, duration, calls, tokens, cost, outcome | “What happened in this run?” |
 | `span_tree` | Nested spans, durations, selected attributes, event names | “What was the execution sequence?” |
 | `slowest_spans` | Longest spans across runs or one trace | “Where did this run spend time?” |
@@ -181,6 +184,9 @@ Missing fields are not inferred from the final answer.
 **The JSONL is rejected.** Each line must be a JSON object representing one
 span with the required trace ID, span ID, name, and start and end timestamps.
 Ask your tracing exporter to produce one span object per line.
+
+**A trace ID prefix is ambiguous.** Copy the full ID from `list_runs` or use a
+longer prefix. The server will report ambiguity instead of mixing runs.
 
 ## Privacy and limits
 

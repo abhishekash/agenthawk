@@ -45,6 +45,17 @@ class TestLoading:
         starts = [s["start_unix_nano"] for s in traces[TRACE_ID]]
         assert starts == sorted(starts)
 
+    def test_partial_final_line_does_not_hide_completed_spans(self, trace_dir):
+        path = trace_dir / "writing.jsonl"
+        path.write_text('{"trace_id":"complete"}\n{"trace_id":', encoding="utf-8")
+        assert [span["trace_id"] for span in core.load_spans(path)] == ["complete"]
+
+    def test_malformed_complete_line_is_reported(self, trace_dir):
+        path = trace_dir / "broken.jsonl"
+        path.write_text('{"trace_id":}\n', encoding="utf-8")
+        with pytest.raises(ValueError, match="invalid span JSON"):
+            core.load_spans(path)
+
 
 class TestRunSummary:
     def test_summary_fields(self, spans):
@@ -114,6 +125,14 @@ class TestTokenUsage:
         assert usage["cost_known"] is False
         assert usage["cost_usd"] is None
 
+    def test_missing_cost_is_unknown(self, spans):
+        llm = next(span for span in spans if span["name"] == "llm.complete")
+        without_cost = {**llm, "attributes": dict(llm["attributes"])}
+        without_cost["attributes"].pop("llm.cost_usd")
+        usage = core.token_usage([without_cost])
+        assert usage["cost_known"] is False
+        assert usage["cost_usd"] is None
+
 
 class TestNewQueries:
     def test_failure_report_is_bounded_and_redacted(self, spans):
@@ -157,6 +176,34 @@ class TestNewQueries:
         compared = core.compare_runs(spans, [TRACE_ID, TRACE_ID])
         assert len(compared["runs"]) == 2
         assert compared["runs"][1]["delta_vs_first"]["total_tokens"] == 0
+
+    def test_compare_runs_with_unknown_cost(self, spans):
+        changed = [dict(span) for span in spans]
+        llm = next(span for span in changed if span["name"] == "llm.complete")
+        llm["attributes"] = {**llm["attributes"], "llm.cost_known": False}
+        compared = core.compare_runs(changed, [TRACE_ID])
+        assert compared["runs"][0]["cost_usd"] is None
+        assert compared["runs"][0]["delta_vs_first"]["cost_usd"] is None
+
+    def test_trace_prefix_must_be_unambiguous(self, spans):
+        second = [{**span, "trace_id": "f920-other"} for span in spans]
+        with pytest.raises(ValueError, match="ambiguous"):
+            core.compare_runs(spans + second, ["f920"])
+        with pytest.raises(ValueError, match="must not be empty"):
+            core.compare_runs(spans, [""])
+
+    def test_compare_counts_failures_beyond_report_limit(self, spans):
+        tool = next(span for span in spans if span["name"] == "tool.call")
+        failures = [
+            {
+                **tool,
+                "span_id": f"failed-{index}",
+                "attributes": {**tool["attributes"], "tool.result_status": "error"},
+            }
+            for index in range(25)
+        ]
+        compared = core.compare_runs(spans + failures, [TRACE_ID])
+        assert compared["runs"][0]["failures"] == 25
 
 
 class TestSearch:

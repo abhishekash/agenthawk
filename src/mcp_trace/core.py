@@ -21,13 +21,20 @@ def load_spans(path: str | Path) -> list[dict[str, Any]]:
     spans: list[dict[str, Any]] = []
     with Path(path).open(encoding="utf-8") as f:
         for lineno, line in enumerate(f, 1):
+            raw_line = line
             line = line.strip()
             if not line:
                 continue
             try:
                 span = json.loads(line)
             except json.JSONDecodeError as e:
+                # A writer may still be appending the final JSONL record.
+                # Keep completed records available to live polling.
+                if not raw_line.endswith("\n"):
+                    break
                 raise ValueError(f"{path}:{lineno}: invalid span JSON: {e}") from e
+            if not isinstance(span, dict):
+                raise ValueError(f"{path}:{lineno}: span must be a JSON object")
             span["_source_file"] = str(path)
             spans.append(span)
     return spans
@@ -128,6 +135,8 @@ def _trace_groups(spans: Iterable[dict[str, Any]]) -> dict[str, list[dict[str, A
 
 
 def _resolve_trace_prefix(spans: Iterable[dict[str, Any]], prefix: str) -> tuple[str, list[dict[str, Any]]]:
+    if not prefix:
+        raise ValueError("trace_id prefix must not be empty")
     groups = _trace_groups(spans)
     matches = [(trace_id, trace_spans) for trace_id, trace_spans in groups.items() if trace_id.startswith(prefix)]
     if not matches:
@@ -272,9 +281,10 @@ def token_usage(spans: list[dict[str, Any]]) -> dict[str, Any]:
         in_tok += int(s["attributes"].get("llm.usage.input_tokens", 0))
         out_tok += int(s["attributes"].get("llm.usage.output_tokens", 0))
         attrs = s["attributes"]
-        cost += float(attrs.get("llm.cost_usd", 0.0))
-        if attrs.get("llm.cost_known", True) is False:
+        if attrs.get("llm.cost_known") is False or attrs.get("llm.cost_usd") is None:
             cost_known = False
+        else:
+            cost += float(attrs["llm.cost_usd"])
     return {
         "llm_calls": calls,
         "input_tokens": in_tok,
@@ -348,7 +358,14 @@ def tool_stats(
             if event.get("name") == "hitl.decision"
             and event.get("attributes", {}).get("hitl.decision") == "deny"
         ]
-        last_error = next((_span_error_detail(span) for span in calls if _span_error_detail(span)), None)
+        last_error = next(
+            (
+                detail
+                for span in sorted(calls, key=lambda s: s["start_unix_nano"], reverse=True)
+                if (detail := _span_error_detail(span))
+            ),
+            None,
+        )
         rows.append(
             {
                 "tool": name,
@@ -498,14 +515,19 @@ def compare_runs(spans: list[dict[str, Any]], trace_ids: list[str]) -> dict[str,
                 "cost_usd": usage["cost_usd"],
                 "total_tokens": usage["total_tokens"],
                 "tool_calls": summary.get("tool_calls", 0),
-                "failures": len(failure_report(trace_spans)),
+                "failures": sum(_span_error(span) for span in trace_spans),
             }
         )
     baseline = runs[0]
     numeric = ("duration_ms", "cost_usd", "total_tokens", "tool_calls", "failures")
     for run in runs:
         run["delta_vs_first"] = {
-            key: round(float(run[key]) - float(baseline[key]), 8) for key in numeric
+            key: (
+                round(float(run[key]) - float(baseline[key]), 8)
+                if run[key] is not None and baseline[key] is not None
+                else None
+            )
+            for key in numeric
         }
     return {"baseline": baseline["trace_id"], "runs": runs}
 

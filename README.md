@@ -4,10 +4,11 @@
 
 [![CI](https://github.com/abhishekash/mcp-trace-inspector/actions/workflows/ci.yml/badge.svg)](https://github.com/abhishekash/mcp-trace-inspector/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-mcp-trace-inspector is a small, local-first stdio MCP server for querying JSONL
-OpenTelemetry spans emitted by agent runs. It exposes focused queries for
-run summaries, tool failures, approvals, activity, and comparisons instead of
-requiring an application-specific dashboard.
+**Ask your agent why a run failed, slowed down, or acted after an approval.**
+mcp-trace-inspector is a local stdio MCP server that lets an MCP client query
+agent-run traces. It reads JSONL spans in the format described in the
+[user guide](docs/user-guide.md), including traces from
+[agent-harness](https://github.com/abhishekash/agent-harness).
 
 <p align="center">
   <a href="docs/media/shell-root-escape-demo.mp4">
@@ -17,19 +18,30 @@ requiring an application-specific dashboard.
 
 **Demo:** [Watch the full 48-second video](docs/media/shell-root-escape-demo.mp4) · [Read the reproducible story](docs/shell-boundary-story.md). This is a scripted regression trace, not a live-model benchmark.
 
+The project's concrete origin was a shell-boundary regression: the harness blocked
+`cat ../outside.txt`, but the old trace recorded only that `run_shell` was
+called, not the returned diagnostic. mcp-trace-inspector and the harness now preserve and
+query that bounded error.
+
+## Try the included trace
+
+```bash
+git clone https://github.com/abhishekash/mcp-trace-inspector.git
+cd mcp-trace-inspector
+uvx --from . mcp-trace-inspector --trace-dir examples --check
+```
+
+`--check` prints JSON with the trace directory, span count, and recent run
+summaries, then exits. It also reports a missing directory or malformed complete
+JSONL record. To ask questions through MCP, connect a client using the
+[configuration below](#client-configuration).
+
 > **Release status:** The `0.3.0` GitHub release is available, but the new PyPI
 > distribution is pending Trusted Publisher registration. Run the tagged Git
 > source with `uvx` below until `uvx mcp-trace-inspector` is available.
 > The [MCP Registry entry](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.abhishekash%2Fmcp-trace-inspector/versions)
-> currently lists the earlier `0.2.2` package; the `0.3.0` metadata follows the new PyPI release.
+> currently lists the earlier `0.2.2` package.
 > [Publication status and directory submission handoff](docs/directory-submission.md).
-
-It pairs with [agent-harness](https://github.com/abhishekash/agent-harness),
-but the reader is format-simple: any JSONL of OTel-shaped spans works. The
-project's concrete origin was a shell-boundary regression: the harness blocked
-`cat ../outside.txt`, but the old trace recorded only that `run_shell` was
-called, not the returned diagnostic. mcp-trace-inspector and the harness now preserve and
-query that bounded error.
 
 ## AI-native use cases
 
@@ -51,8 +63,8 @@ The tools read stored traces and can poll files being written, but they do not p
 uvx --from git+https://github.com/abhishekash/mcp-trace-inspector@v0.3.0 mcp-trace-inspector --trace-dir ./traces
 # or, for local development:
 git clone https://github.com/abhishekash/mcp-trace-inspector
-cd mcp-trace-inspector && uv pip install -e .
-mcp-trace-inspector --trace-dir ./traces
+cd mcp-trace-inspector
+uvx --from . mcp-trace-inspector --trace-dir ./traces
 ```
 
 ## Client configuration
@@ -112,7 +124,7 @@ Tool descriptions are written as prompts (when-to-use, not just what-it-does) �
 
 ```
 > list_runs
-[{ "trace_id": "f920798dd255…", "task": "Summarize the workspace's notes…",
+[{ "trace_id": "f920798dd2558fcb84f9977736432a8b", "task": "Summarize the workspace's notes…",
    "tool_calls": 4, "human_decisions": 2, "stopped_reason": "completed" }]
 
 > approval_log
@@ -133,7 +145,7 @@ traces/*.jsonl ──▶ mcp_trace.core (pure query functions, zero deps)
 - **core/server split**: all logic is pure functions over parsed spans; the MCP layer only parses args and JSON-encodes results. Tests hit both layers.
 - **trace_id prefixes**: agents fumble full 32-char hex ids; every tool accepts prefixes.
 - **bounded output**: diagnostics are truncated and obvious credentials are redacted before query results leave the server.
-- **honest cost totals**: `token_usage` returns `cost_known: false` and a null cost when any producer marks pricing as unavailable; unknown pricing is never presented as `$0`.
+- **honest cost totals**: `token_usage` returns `cost_known: false` and a null cost when any model span lacks a cost or marks pricing as unavailable; unknown pricing is never presented as `$0`.
 - **cursor polling**: `recent_activity` makes the snapshot reader useful while a run is still writing spans.
 - The demo fixture ([`examples/example_trace.jsonl`](examples/example_trace.jsonl)) is a *real* agent-harness run, not hand-written.
 
