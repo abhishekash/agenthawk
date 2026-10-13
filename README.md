@@ -34,6 +34,12 @@ query that bounded error.
 
 The tools read stored traces and can poll files being written, but they do not push events or infer intent from the final answer. Start with the [installation and user guide](docs/user-guide.md), then see the [real trace fixture](examples/example_trace.jsonl) and the [tool descriptions](src/mcp_trace/server.py) for the query contract.
 
+## Demo and story
+
+[![Watch the shell-boundary demo](docs/media/shell-root-escape-poster.png)](docs/media/shell-root-escape-demo.mp4)
+
+[Watch the 48-second captioned demo](docs/media/shell-root-escape-demo.mp4) and read [the reproducible story](docs/shell-boundary-story.md). It follows a real trace from the scripted `shell-root-escape` regression in `agent-evals`: an attempted `cat ../outside.txt`, the harness's exact boundary error, and the inspector query that retrieves it. The scripted pass checks runtime behavior; it is not a live-model benchmark.
+
 ## Install & run
 
 ```bash
