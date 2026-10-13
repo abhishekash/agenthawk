@@ -68,7 +68,24 @@ usage, a tool call, and an exception.
 
 ## Capture your own traces
 
-Start the receiver in one terminal:
+For a Python agent, install SpanHound's optional auto instrumentation **in the
+same environment as the agent**, then run it through SpanHound:
+
+```bash
+python -m pip install 'spanhound[auto]'
+spanhound run --trace-dir ./traces -- python agent.py
+```
+
+The command starts and stops a local receiver, configures OTLP export, and
+captures supported library calls without changes to `agent.py`. The optional
+package includes instrumentation for OpenAI, Anthropic, OpenAI Agents, HTTPX,
+and Requests. It reports when no spans were produced. Your Python agent and
+SpanHound must share one environment; for a uv project, use
+`uv add 'spanhound[auto]'` and `uv run spanhound run -- python agent.py`.
+See the [Python capture guide](docs/user-guide.md#capture-a-python-agent-in-one-command).
+
+For other runtimes, or agents that already export OpenTelemetry traces, start
+the receiver in one terminal:
 
 ```bash
 uvx spanhound collect --trace-dir ./traces
@@ -91,16 +108,17 @@ protobuf on loopback; it does not add instrumentation to an agent. See the
 
 ## Where it fits
 
-Use this when your agent already writes the [supported JSONL span format or OTLP JSON export](docs/user-guide.md#requirements)
-and you want an MCP client to inspect those files without setting up a trace
-backend. Its focused queries include recorded approval decisions, bounded
-failure diagnostics, and comparisons between selected runs.
+Use this when you want a local trace view through MCP without setting up a
+trace backend. Capture supported Python library calls in one command, receive
+OTLP/HTTP from another runtime, or read the [supported JSONL or OTLP JSON
+formats](docs/user-guide.md#requirements). Focused queries include recorded
+approval decisions, bounded failure diagnostics, and run comparisons.
 
 [MCP Agent Trace Inspector](https://github.com/dbsectrainer/mcp-agent-trace-inspector)
 records steps into a local SQLite database and provides a dashboard and
-exports. SpanHound receives standard OTLP/HTTP traces from an instrumented
-agent and queries the captured files through MCP. It does not instrument the
-agent or record its actions by itself.
+exports. SpanHound auto-instruments supported Python libraries or receives
+OTLP/HTTP traces, then queries the captured files through MCP. It does not
+automatically trace arbitrary agent functions or approvals.
 
 For traces stored in Jaeger, Tempo, or Traceloop, use a backend-connected tool
 such as [OpenTelemetry MCP Server](https://github.com/traceloop/opentelemetry-mcp-server).
@@ -232,7 +250,7 @@ traces/*.json  ──┴─▶ mcp_trace.core (local query functions)
 
 ## Honest limitations
 
-- stdio transport only (Streamable HTTP plus authenticated remote access is the next transport boundary)
+- MCP stdio transport only (Streamable HTTP plus authenticated remote access is the next transport boundary)
 - live polling re-reads snapshots; it is not a push subscription
 - security audit can only report identity/provenance that the trace producer records
 - read-only tools; trace mutation (annotations) is roadmap

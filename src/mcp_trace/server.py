@@ -74,8 +74,10 @@ def _demo() -> None:
     print("\nThis trace came from a scripted agent-evals regression.")
     print("Inspect your own JSONL or OTLP JSON traces with:")
     print("  uvx spanhound --trace-dir /path/to/traces --check")
-    print("To capture traces from an instrumented agent, start:")
-    print("  uvx spanhound collect --trace-dir ./traces")
+    print("To capture a Python agent without exporter setup:")
+    print("  python -m pip install 'spanhound[auto]'")
+    print("  spanhound run --trace-dir ./traces -- python agent.py")
+    print("For another runtime, start: uvx spanhound collect --trace-dir ./traces")
 
 
 @mcp.tool()
@@ -178,12 +180,19 @@ def compare_runs(trace_ids: list[str]) -> str:
 
 def main() -> None:
     global _trace_dir
-    parser = argparse.ArgumentParser(description="Inspect and collect local agent traces")
+    if sys.argv[1:2] == ["run"]:
+        from mcp_trace.runner import main as run_main
+
+        raise SystemExit(run_main(sys.argv[2:]))
+    parser = argparse.ArgumentParser(
+        description="Inspect and collect local agent traces",
+        epilog="For one-command Python capture, run: spanhound run --help",
+    )
     parser.add_argument(
         "command",
         nargs="?",
         choices=("demo", "collect"),
-        help="demo: inspect a bundled failure; collect: receive local OTLP/HTTP traces",
+        help="demo: inspect a failure; collect: receive OTLP/HTTP traces; run: auto-capture Python (see 'spanhound run --help')",
     )
     parser.add_argument(
         "--trace-dir",
