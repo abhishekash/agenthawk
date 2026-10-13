@@ -2,7 +2,7 @@
 
 <!-- mcp-name: io.github.abhishekash/spanhound -->
 
-[![CI](https://github.com/abhishekash/spanhound/actions/workflows/ci.yml/badge.svg)](https://github.com/abhishekash/spanhound/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![CI](https://github.com/abhishekash/spanhound/actions/workflows/ci.yml/badge.svg)](https://github.com/abhishekash/spanhound/actions/workflows/ci.yml) [![PyPI](https://img.shields.io/pypi/v/spanhound)](https://pypi.org/project/spanhound/) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 **Inspect recorded agent-run failures and approvals from local trace files.**
 SpanHound (formerly mcp-trace-inspector) is a read-only stdio MCP server for inspecting local
@@ -85,6 +85,11 @@ git clone https://github.com/abhishekash/spanhound
 cd spanhound
 uvx --from . spanhound --trace-dir ./traces
 ```
+
+If you previously ran `uvx mcp-trace-inspector`, change that command to
+`uvx spanhound` to receive this release. The old PyPI distribution stays at
+`0.3.1`; the new package retains its Python import paths and command aliases
+for clients that install `spanhound` explicitly.
 
 ## Client configuration
 
