@@ -10,4 +10,4 @@ RUN python -m pip install --no-cache-dir . \
 
 ENV MCP_TRACE_DIR=/app/examples
 USER mcp-trace
-CMD ["mcp-trace-inspector"]
+CMD ["spanhound"]

@@ -1,4 +1,4 @@
-name: publish-mcp-trace-inspector
+name: publish-spanhound
 
 on:
   workflow_dispatch:

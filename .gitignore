@@ -11,3 +11,4 @@ htmlcov/
 traces/
 runs.jsonl
 .env
+uv.lock

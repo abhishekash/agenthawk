@@ -1,4 +1,4 @@
-"""mcp-trace-inspector MCP server entry point."""
+"""spanhound MCP server entry point."""
 from mcp_trace.server import *  # noqa: F401,F403
 from mcp_trace.server import main
 

@@ -1,12 +1,12 @@
-# mcp-trace-inspector user guide
+# SpanHound user guide
 
-mcp-trace-inspector lets an MCP client ask questions about an agent's recorded traces.
-Point it at a directory of JSONL span records, connect it to an MCP client, and
+SpanHound lets an MCP client ask questions about an agent's recorded traces.
+Point it at a directory of JSONL spans or OTLP JSON exports, connect it to an MCP client, and
 ask about a run's tool calls, failures, approvals, timing, or token usage.
 
 ## What it helps with
 
-Use mcp-trace-inspector when you want to:
+Use spanhound when you want to:
 
 - Find a slow model or tool call without reading every trace line.
 - See recorded tool failures and bounded diagnostic messages.
@@ -14,7 +14,7 @@ Use mcp-trace-inspector when you want to:
 - Compare recorded latency, tokens, tool calls, and failures across runs.
 - Keep traces on your own machine and query them from an MCP-capable client.
 
-mcp-trace-inspector is a read-only trace viewer. It does not run, change, retry, or stop
+spanhound is a read-only trace viewer. It does not run, change, retry, or stop
 the agent being observed. Live activity is returned by polling the trace files;
 there is no push stream. Results describe evidence in the traces. Missing
 identity or approval fields mean the producer did not record that evidence;
@@ -29,41 +29,42 @@ they do not prove a person or policy authorized an action.
   `start_unix_nano`, `end_unix_nano`, `attributes`, and, where available,
   `parent_span_id`, `status`, and `events`. Tool, model, and approval details
   depend on the attributes your trace producer records.
+- Or saved OTLP/JSON trace exports (`.json`) containing a `resourceSpans` array,
+  as produced by an OpenTelemetry exporter or collector. The reader accepts
+  both formats in the same directory and searches subdirectories.
 
-The bundled example trace works immediately. Other producers may need an
-export adapter to map their OTel export format into these JSONL span records.
+The bundled [JSONL example](../examples/example_trace.jsonl) and
+[OTLP JSON example](../tests/fixtures/otlp_trace.json) work immediately. Backend-specific
+exports, such as Jaeger JSON, may need conversion to OTLP/JSON.
 
 ## Install and start
 
-Until the new distribution is published to PyPI, `uvx` can run the tagged Git
-source without a project checkout (see the [release status](../README.md)):
-
 ```bash
-uvx --from git+https://github.com/abhishekash/mcp-trace-inspector@v0.3.0 mcp-trace-inspector --trace-dir /absolute/path/to/traces
+uvx spanhound --trace-dir /absolute/path/to/traces
 ```
 
 The server speaks MCP over standard input and output, so this command waits for
 an MCP client. Its startup message goes to standard error. To use a different
 trace directory, change `/absolute/path/to/traces` to the directory containing
-your `.jsonl` files. Relative paths are resolved from the server's working
+your `.jsonl` or OTLP `.json` files. Relative paths are resolved from the server's working
 directory.
 
 For a local development install:
 
 ```bash
-git clone https://github.com/abhishekash/mcp-trace-inspector.git
-cd mcp-trace-inspector
-uvx --from . mcp-trace-inspector --trace-dir /absolute/path/to/traces
+git clone https://github.com/abhishekash/spanhound.git
+cd spanhound
+uvx --from . spanhound --trace-dir /absolute/path/to/traces
 ```
 
-Run `uvx --from . mcp-trace-inspector --trace-dir examples --check` from the
+Run `uvx --from . spanhound --trace-dir examples --check` from the
 repository to validate the included fixture and print its run summary without
 starting an MCP client.
 
 You can also set `MCP_TRACE_DIR` and omit `--trace-dir`:
 
 ```bash
-MCP_TRACE_DIR=/absolute/path/to/traces uvx --from git+https://github.com/abhishekash/mcp-trace-inspector@v0.3.0 mcp-trace-inspector
+MCP_TRACE_DIR=/absolute/path/to/traces uvx spanhound
 ```
 
 The server is local and read-only. Connecting an MCP client gives that client
@@ -81,12 +82,10 @@ For clients using the `mcpServers` JSON format, the entry looks like this:
 ```json
 {
   "mcpServers": {
-    "mcp-trace-inspector": {
+    "spanhound": {
       "command": "uvx",
       "args": [
-        "--from",
-        "git+https://github.com/abhishekash/mcp-trace-inspector@v0.3.0",
-        "mcp-trace-inspector",
+        "spanhound",
         "--trace-dir",
         "/absolute/path/to/traces"
       ]
@@ -100,13 +99,13 @@ example, clients can place MCP server entries in user-level or project-level
 settings. Use an absolute trace path so the server does not depend on the
 client's working directory.
 
-With the mcp-trace-inspector repository checked out locally, run the server directly:
+With the spanhound repository checked out locally, run the server directly:
 
 ```json
 {
   "mcpServers": {
-    "mcp-trace-inspector": {
-      "command": "/absolute/path/to/mcp-trace-inspector/.venv/bin/mcp-trace-inspector",
+    "spanhound": {
+      "command": "/absolute/path/to/spanhound/.venv/bin/spanhound",
       "args": ["--trace-dir", "/absolute/path/to/traces"]
     }
   }
@@ -114,7 +113,7 @@ With the mcp-trace-inspector repository checked out locally, run the server dire
 ```
 
 On Windows, use the executable path from your virtual environment, commonly
-`C:\\path\\to\\mcp-trace-inspector\\.venv\\Scripts\\mcp-trace-inspector.exe`.
+`C:\\path\\to\\spanhound\\.venv\\Scripts\\spanhound.exe`.
 
 ## First questions to ask
 
@@ -153,11 +152,11 @@ evidence in its answer so you can check the result against the source data.
 
 ## Connect agent-harness
 
-mcp-trace-inspector can run as a stdio MCP server mounted by `agent-harness`:
+spanhound can run as a stdio MCP server mounted by `agent-harness`:
 
 ```bash
 harness run "Inspect the last run and explain its failure" \
-  --mcp "uvx --from git+https://github.com/abhishekash/mcp-trace-inspector@v0.3.0 mcp-trace-inspector --trace-dir ./traces" \
+  --mcp "uvx spanhound --trace-dir ./traces" \
   --approve cli
 ```
 
@@ -172,9 +171,9 @@ the package can be fetched, and the configured trace path exists. Reload the
 client's MCP configuration and check its server logs; the server writes its
 startup message to standard error.
 
-**No runs appear.** Check that the path points to a directory
-containing `.jsonl` files. The server searches subdirectories. The included
-example is at `examples/example_trace.jsonl` in the repository.
+**No runs appear.** Check that the path points to a directory containing
+`.jsonl` span files or OTLP `.json` exports. The server searches subdirectories.
+The included JSONL example is at `examples/example_trace.jsonl`.
 
 **Runs appear, but model or approval details are missing.** The server only
 reports fields present in the trace. Check whether your producer exports model
@@ -185,12 +184,16 @@ Missing fields are not inferred from the final answer.
 span with the required trace ID, span ID, name, and start and end timestamps.
 Ask your tracing exporter to produce one span object per line.
 
+**The OTLP JSON is rejected.** Export an OTLP/JSON trace request with
+`resourceSpans`, `scopeSpans`, and `spans`; a Jaeger or Zipkin API response is
+a different format. `--check` reports the file and invalid field.
+
 **A trace ID prefix is ambiguous.** Copy the full ID from `list_runs` or use a
 longer prefix. The server will report ambiguity instead of mixing runs.
 
 ## Privacy and limits
 
-mcp-trace-inspector processes the files in the configured directory and returns selected
+spanhound processes the files in the configured directory and returns selected
 trace fields to the connected MCP client. Failure messages are bounded and
 credential patterns are redacted, but redaction is not a guarantee that every
 private value is removed. Review trace contents and client access before using
@@ -203,7 +206,7 @@ are unknown when the trace producer does not provide reliable pricing.
 
 ## Example data
 
-Try mcp-trace-inspector against the checked-in
+Try spanhound against the checked-in
 [example trace](../examples/example_trace.jsonl). It contains a run emitted by
 `agent-harness` and can be queried using the tools above.
 

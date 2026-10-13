@@ -19,9 +19,9 @@ from mcp.server.mcpserver.exceptions import ToolError
 from mcp_trace import core
 
 mcp = MCPServer(
-    "mcp-trace-inspector",
+    "spanhound",
     instructions=(
-        "Query OpenTelemetry traces of agent runs (JSONL span files). "
+        "Query local agent traces (JSONL spans or OTLP JSON exports). "
         "Use list_runs to see recent runs, run_summary/span_tree to inspect one, "
         "slowest_spans for latency questions, approval_log for what humans "
         "approved/denied, token_usage for cost questions, failure_report for "
@@ -160,7 +160,7 @@ def main() -> None:
     parser.add_argument(
         "--trace-dir",
         default=os.environ.get("MCP_TRACE_DIR", "./traces"),
-        help="directory of JSONL span files (default: $MCP_TRACE_DIR or ./traces)",
+        help="directory of JSONL spans or OTLP JSON exports (default: $MCP_TRACE_DIR or ./traces)",
     )
     parser.add_argument(
         "--check",
@@ -176,5 +176,5 @@ def main() -> None:
             parser.error(str(exc))
         print(_dump({"trace_dir": str(_trace_dir), "spans": len(spans), "runs": core.list_runs(spans)}))
         return
-    print(f"mcp-trace-inspector serving traces from {_trace_dir}", file=sys.stderr)
+    print(f"spanhound serving traces from {_trace_dir}", file=sys.stderr)
     mcp.run(transport="stdio")

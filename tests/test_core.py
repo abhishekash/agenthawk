@@ -1,4 +1,7 @@
-"""Core query tests against a real agent-harness trace fixture."""
+"""Core query tests against agent-harness and OTLP trace fixtures."""
+import json
+from pathlib import Path
+
 import pytest
 
 from mcp_trace import core
@@ -55,6 +58,40 @@ class TestLoading:
         path.write_text('{"trace_id":}\n', encoding="utf-8")
         with pytest.raises(ValueError, match="invalid span JSON"):
             core.load_spans(path)
+
+    def test_otlp_export_queries_and_jsonl_coexist(self, tmp_path):
+        import shutil
+
+        shutil.copy("tests/fixtures/demo_trace.jsonl", tmp_path / "demo.jsonl")
+        shutil.copy("tests/fixtures/otlp_trace.json", tmp_path / "export.json")
+        loaded = core.load_trace_dir(tmp_path)
+        assert len(loaded) == 18
+        assert len(core.list_runs(loaded)) == 2
+        otlp = [span for span in loaded if span["_source_file"].endswith("export.json")]
+        assert len(otlp) == 3
+        assert otlp[0]["trace_id"] == "a920798dd2558fcb84f9977736432a8b"
+        assert otlp[2]["attributes"]["tool.arguments"] == {"retry": True}
+        summary = core.run_summary(otlp[0]["trace_id"], otlp)
+        assert summary["model"] == "gpt-4.1"
+        assert summary["tool_calls"] == 1
+        assert summary["tools_used"] == ["lookup"]
+        assert summary["input_tokens"] == 42
+        assert core.token_usage(otlp)["total_tokens"] == 49
+        assert core.token_usage(otlp)["cost_usd"] is None
+        assert core.span_tree(otlp[0]["trace_id"], otlp)["children"][1]["name"] == "execute_tool lookup"
+        assert core.failure_report(otlp)[0]["detail"] == "Lookup unavailable"
+        assert core.tool_stats(otlp)[0]["tool"] == "lookup"
+
+    def test_otlp_export_rejects_invalid_shape_and_ids(self, tmp_path):
+        path = tmp_path / "invalid.json"
+        path.write_text('{"spans": []}', encoding="utf-8")
+        with pytest.raises(ValueError, match="resourceSpans"):
+            core.load_trace_dir(tmp_path)
+        content = json.loads(Path("tests/fixtures/otlp_trace.json").read_text(encoding="utf-8"))
+        content["resourceSpans"][0]["scopeSpans"][0]["spans"][0]["traceId"] = "bad"
+        path.write_text(json.dumps(content), encoding="utf-8")
+        with pytest.raises(ValueError, match="traceId must be"):
+            core.load_trace_dir(tmp_path)
 
 
 class TestRunSummary:

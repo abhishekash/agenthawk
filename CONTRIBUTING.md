@@ -1,4 +1,4 @@
-# Contributing to mcp-trace-inspector
+# Contributing to spanhound
 
 ## Development setup
 

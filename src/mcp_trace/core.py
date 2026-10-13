@@ -1,4 +1,4 @@
-"""Trace query engine over JSONL span files.
+"""Trace query engine over local JSONL spans and OTLP JSON exports.
 
 Pure functions — no MCP or OTel imports — so the query logic is testable
 offline and reusable. The MCP server (server.py) is a thin adapter over this.
@@ -12,6 +12,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 from typing import Any, Iterable
+
+from .otlp import load_otlp_json
 
 # ---------------------------------------------------------------------------
 # loading
@@ -41,13 +43,15 @@ def load_spans(path: str | Path) -> list[dict[str, Any]]:
 
 
 def load_trace_dir(trace_dir: str | Path) -> list[dict[str, Any]]:
-    """Load every JSONL span file below a trace directory."""
+    """Load every JSONL span file and OTLP JSON export below a directory."""
     root = Path(trace_dir)
     if not root.is_dir():
         raise FileNotFoundError(f"trace dir not found: {root}")
     spans: list[dict[str, Any]] = []
-    for path in sorted(p for p in root.rglob("*.jsonl") if p.is_file()):
-        spans.extend(load_spans(path))
+    for path in sorted(
+        p for p in root.rglob("*") if p.is_file() and p.suffix in {".jsonl", ".json"}
+    ):
+        spans.extend(load_spans(path) if path.suffix == ".jsonl" else load_otlp_json(path))
     return spans
 
 
@@ -92,7 +96,7 @@ def _span_error(span: dict[str, Any]) -> bool:
     stopped = str(attrs.get("agent.stopped_reason", "")).lower()
     events = span.get("events", []) or []
     return bool(
-        _status_code(span) in {"ERROR", "2"}
+        _status_code(span) in {"ERROR", "STATUS_CODE_ERROR", "2"}
         or result_status in {"error", "denied"}
         or attrs.get("tool.error")
         or stopped not in {"", "completed"}
@@ -150,6 +154,27 @@ def _duration_ms(span: dict[str, Any]) -> float:
     return max(0, span["end_unix_nano"] - span["start_unix_nano"]) / 1e6
 
 
+def _is_llm_span(span: dict[str, Any]) -> bool:
+    attrs = span.get("attributes", {})
+    return span["name"] == "llm.complete" or attrs.get("gen_ai.operation.name") in {
+        "chat", "generate_content", "text_completion",
+    }
+
+
+def _is_tool_span(span: dict[str, Any]) -> bool:
+    return span["name"] == "tool.call" or span.get("attributes", {}).get(
+        "gen_ai.operation.name"
+    ) == "execute_tool"
+
+
+def _tool_name(span: dict[str, Any]) -> str | None:
+    attrs = span.get("attributes", {})
+    if _is_tool_span(span):
+        name = attrs.get("tool.name") or attrs.get("gen_ai.tool.name")
+        return str(name) if name else None
+    return None
+
+
 def _root(spans: list[dict[str, Any]]) -> dict[str, Any] | None:
     ids = {s["span_id"] for s in spans}
     for s in spans:
@@ -164,25 +189,44 @@ def run_summary(trace_id: str, spans: list[dict[str, Any]]) -> dict[str, Any]:
     attrs = (root or {}).get("attributes", {})
     started = min(s["start_unix_nano"] for s in spans)
     ended = max(s["end_unix_nano"] for s in spans)
-    llm_spans = [s for s in spans if s["name"] == "llm.complete"]
-    tool_spans = [s for s in spans if s["name"] == "tool.call"]
+    llm_spans = [s for s in spans if _is_llm_span(s)]
+    tool_spans = [s for s in spans if _is_tool_span(s)]
+    usage = token_usage(spans) if llm_spans else None
+    model = attrs.get("llm.model") or next(
+        (
+            s["attributes"].get("gen_ai.response.model")
+            or s["attributes"].get("gen_ai.request.model")
+            for s in llm_spans
+            if s["attributes"].get("gen_ai.response.model")
+            or s["attributes"].get("gen_ai.request.model")
+        ),
+        None,
+    )
     decisions = [
         e for s in spans for e in s.get("events", []) if e["name"] == "hitl.decision"
     ]
     return {
         "trace_id": trace_id,
         "task": attrs.get("agent.task"),
-        "model": attrs.get("llm.model"),
+        "model": model,
         "started_unix_nano": started,
         "duration_ms": round((ended - started) / 1e6, 2),
         "spans": len(spans),
         "llm_calls": len(llm_spans),
         "tool_calls": len(tool_spans),
-        "tools_used": sorted({s["attributes"].get("tool.name", "?") for s in tool_spans}),
+        "tools_used": sorted({_tool_name(s) or "?" for s in tool_spans}),
         "human_decisions": len(decisions),
         "denials": sum(1 for e in decisions if e["attributes"].get("hitl.decision") == "deny"),
-        "input_tokens": attrs.get("agent.usage.input_tokens"),
-        "output_tokens": attrs.get("agent.usage.output_tokens"),
+        "input_tokens": (
+            attrs["agent.usage.input_tokens"]
+            if attrs.get("agent.usage.input_tokens") is not None
+            else usage["input_tokens"] if usage else None
+        ),
+        "output_tokens": (
+            attrs["agent.usage.output_tokens"]
+            if attrs.get("agent.usage.output_tokens") is not None
+            else usage["output_tokens"] if usage else None
+        ),
         "cost_usd": attrs.get("agent.cost_usd"),
         "stopped_reason": attrs.get("agent.stopped_reason"),
         "source": (root or spans[0]).get("_source_file"),
@@ -239,7 +283,7 @@ def slowest_spans(spans: list[dict[str, Any]], k: int = 5, name_filter: str | No
         {
             "name": s["name"],
             "duration_ms": round(_duration_ms(s), 2),
-            "tool": s["attributes"].get("tool.name"),
+            "tool": _tool_name(s),
             "trace_id": s["trace_id"],
         }
         for s in pool[:k]
@@ -269,17 +313,25 @@ def approval_log(spans: list[dict[str, Any]]) -> list[dict[str, Any]]:
 
 
 def token_usage(spans: list[dict[str, Any]]) -> dict[str, Any]:
-    """Aggregate token + cost accounting across llm.complete spans."""
+    """Aggregate token + cost accounting across model spans."""
     in_tok = out_tok = 0
     cost = 0.0
     cost_known = True
     calls = 0
     for s in spans:
-        if s["name"] != "llm.complete":
+        if not _is_llm_span(s):
             continue
         calls += 1
-        in_tok += int(s["attributes"].get("llm.usage.input_tokens", 0))
-        out_tok += int(s["attributes"].get("llm.usage.output_tokens", 0))
+        in_tok += int(
+            s["attributes"].get("llm.usage.input_tokens")
+            or s["attributes"].get("gen_ai.usage.input_tokens")
+            or 0
+        )
+        out_tok += int(
+            s["attributes"].get("llm.usage.output_tokens")
+            or s["attributes"].get("gen_ai.usage.output_tokens")
+            or 0
+        )
         attrs = s["attributes"]
         if attrs.get("llm.cost_known") is False or attrs.get("llm.cost_usd") is None:
             cost_known = False
@@ -340,8 +392,8 @@ def tool_stats(
     pool = spans if trace_id is None else _resolve_trace_prefix(spans, trace_id)[1]
     grouped: dict[str, list[dict[str, Any]]] = {}
     for span in pool:
-        name = span.get("attributes", {}).get("tool.name")
-        if span.get("name") != "tool.call" or not name:
+        name = _tool_name(span)
+        if not name:
             continue
         if tool_name and name != tool_name:
             continue
@@ -396,7 +448,7 @@ def security_audit(
     it.
     """
     pool = spans if trace_id is None else _resolve_trace_prefix(spans, trace_id)[1]
-    calls = [span for span in pool if span.get("name") == "tool.call"]
+    calls = [span for span in pool if _is_tool_span(span)]
     identity_keys = ("agent.identity", "auth.subject", "user.id", "mcp.client_id")
     tenant_keys = ("auth.tenant", "tenant.id", "agent.tenant")
     server_keys = ("mcp.server", "mcp.server.name", "mcp.server.version")
