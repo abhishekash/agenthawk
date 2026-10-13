@@ -8,52 +8,124 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import shutil
 import subprocess
-import tempfile
 from pathlib import Path
 
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "docs" / "media"
 FONT = "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf"
-BG = "#0c1220"
-PANEL = "#151f31"
+SANS_BOLD = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
+BG = "#07101e"
+PANEL = "#101d30"
 WHITE = "#eff6ff"
 MUTED = "#a9bad0"
-CYAN = "#58d9e8"
-GREEN = "#7ee0a1"
-AMBER = "#ffc778"
+CYAN = "#6eeaff"
+GREEN = "#83f6bd"
+AMBER = "#ffd28a"
+CORAL = "#ff748d"
+BLUE = "#378bff"
 
 
-def font(size: int) -> ImageFont.FreeTypeFont:
-    return ImageFont.truetype(FONT, size)
+def font(size: int, *, headline: bool = False) -> ImageFont.FreeTypeFont:
+    return ImageFont.truetype(SANS_BOLD if headline else FONT, size)
+
+
+def rgba(color: str, alpha: int = 255) -> tuple[int, int, int, int]:
+    return (*bytes.fromhex(color.lstrip("#")), alpha)
+
+
+def backdrop() -> Image.Image:
+    im = Image.new("RGBA", (1280, 720), BG)
+    d = ImageDraw.Draw(im)
+    for y in range(720):
+        d.line((0, y, 1280, y), fill=(7, 15 + y // 180, 29 + y // 65, 255))
+    bloom = Image.new("RGBA", im.size)
+    b = ImageDraw.Draw(bloom)
+    b.ellipse((720, -280, 1470, 470), fill=rgba(BLUE, 42))
+    b.ellipse((-340, 370, 350, 1060), fill=rgba(CYAN, 28))
+    im.alpha_composite(bloom.filter(ImageFilter.GaussianBlur(120)))
+    grid_layer = Image.new("RGBA", im.size)
+    grid = ImageDraw.Draw(grid_layer)
+    for x in range(0, 1281, 64):
+        grid.line((x, 0, x, 720), fill=rgba(CYAN, 20))
+    for y in range(0, 721, 64):
+        grid.line((0, y, 1280, y), fill=rgba(CYAN, 20))
+    im.alpha_composite(grid_layer)
+    return im
+
+
+def radar(im: Image.Image, number: int, accent: str) -> None:
+    ring_layer = Image.new("RGBA", im.size)
+    rings = ImageDraw.Draw(ring_layer)
+    cx, cy = 1052, 459
+    for radius, alpha in ((142, 60), (106, 105), (70, 170)):
+        rings.ellipse((cx-radius, cy-radius, cx+radius, cy+radius),
+                      outline=rgba(accent, alpha), width=2)
+    im.alpha_composite(ring_layer)
+    d = ImageDraw.Draw(im)
+    for angle in range(0, 360, 60):
+        theta = math.radians(angle + number * 7)
+        x = cx + int(106 * math.cos(theta))
+        y = cy + int(106 * math.sin(theta))
+        d.ellipse((x-5, y-5, x+5, y+5), fill=accent)
+    d.line((cx-55, cy, cx-12, cy, cx+12, cy-30,
+            cx+45, cy+30, cx+70, cy+30), fill=accent, width=4)
+    status = "BLOCKED" if number == 4 else "TRACE / 0" + str(number)
+    d.text((cx-75, cy+55), status, font=font(17), fill=accent if number == 4 else MUTED)
 
 
 def slide(number: int, title: str, kicker: str, lines: list[tuple[str, str]],
           footer: str) -> Image.Image:
-    im = Image.new("RGB", (1280, 720), BG)
+    im = backdrop()
+    accent = CORAL if number == 4 else GREEN if number == 2 else CYAN
+    halo = Image.new("RGBA", im.size)
+    h = ImageDraw.Draw(halo)
+    h.rounded_rectangle((48, 259, 1232, 612), 24,
+                        outline=rgba(accent, 110), width=5)
+    im.alpha_composite(halo.filter(ImageFilter.GaussianBlur(18)))
     d = ImageDraw.Draw(im)
-    d.rounded_rectangle((48, 40, 1232, 90), 16, fill=PANEL)
-    d.text((70, 52), "MCP TRACE INSPECTOR  /  REAL TRACE DEMO", font=font(20), fill=CYAN)
-    d.text((1160, 52), f"{number:02}/08", font=font(20), fill=MUTED)
-    d.text((70, 130), kicker.upper(), font=font(23), fill=CYAN)
-    d.text((70, 174), title, font=font(42), fill=WHITE)
-    d.rounded_rectangle((48, 259, 1232, 611), 22, fill=PANEL)
-    d.rounded_rectangle((48, 259, 1232, 301), 18, fill="#22314a")
-    d.ellipse((70, 273, 85, 288), fill="#ff7676")
-    d.ellipse((96, 273, 111, 288), fill=AMBER)
-    d.ellipse((122, 273, 137, 288), fill=GREEN)
-    y = 329
+    d.line((48, 102, 1232, 102), fill="#365474", width=2)
+    d.rounded_rectangle((48, 40, 97, 86), 10, fill="#103e4b", outline=CYAN, width=2)
+    d.text((63, 47), "M", font=font(25, headline=True), fill=CYAN)
+    d.text((115, 50), "MCP / TRACE INSPECTOR", font=font(19), fill=WHITE)
+    d.ellipse((958, 58, 969, 69), fill=GREEN)
+    d.text((981, 54), "REAL TRACE • STDIO MCP", font=font(16), fill=MUTED)
+    d.rounded_rectangle((65, 126, 65 + 19 * len(kicker), 159), 10,
+                        fill="#133746", outline=CYAN, width=1)
+    d.text((78, 133), kicker.upper(), font=font(17), fill=CYAN)
+    if number == 1:
+        lead = "Make failures "
+        headline_font = font(47, headline=True)
+        d.text((65, 181), lead, font=headline_font, fill=WHITE)
+        d.text((65 + d.textlength(lead, font=headline_font), 181),
+               "answerable.", font=headline_font, fill=CYAN)
+    else:
+        d.text((65, 181), title, font=font(47, headline=True), fill=WHITE)
+    d.rounded_rectangle((48, 259, 1232, 611), 22,
+                        fill=PANEL, outline=accent, width=2)
+    d.rounded_rectangle((48, 259, 1232, 307), 20, fill="#18314b")
+    d.rectangle((49, 286, 1231, 308), fill="#18314b")
+    for x, color in ((76, CORAL), (101, AMBER), (126, GREEN)):
+        d.ellipse((x, 276, x + 14, 290), fill=color)
+    d.text((170, 274), "EVIDENCE VIEW  /  SCRIPTED REGRESSION",
+           font=font(17), fill=MUTED)
+    d.line((859, 330, 859, 577), fill="#2e4d61", width=2)
+    d.rounded_rectangle((68, 327, 74, 570), 3, fill=accent)
+    y = 344
     for line, color in lines:
-        d.text((76, y), line, font=font(25), fill=color)
-        y += 43
-    d.text((70, 646), footer, font=font(20), fill=MUTED)
-    d.rounded_rectangle((48, 688, 1232, 694), 3, fill="#2c3c53")
-    d.rounded_rectangle((48, 688, 48 + 1184 * number // 8, 694), 3, fill=CYAN)
-    return im
+        d.text((94, y), line, font=font(23), fill=color)
+        y += 47
+    radar(im, number, accent)
+    d = ImageDraw.Draw(im)
+    d.line((48, 641, 1232, 641), fill="#365474", width=2)
+    d.text((67, 655), footer, font=font(17), fill=MUTED)
+    d.text((1138, 655), f"{number:02} / 08", font=font(16), fill=CYAN)
+    return im.convert("RGB")
 
 
 def verified_trace(path: Path) -> dict:
@@ -71,6 +143,90 @@ def verified_trace(path: Path) -> dict:
     return {"trace_id": calls[0]["trace_id"], "error": expected}
 
 
+def animated_frame(slides: list[Image.Image], durations: list[int],
+                   seconds: float) -> Image.Image:
+    total = sum(durations)
+    start = 0
+    scene = len(slides) - 1
+    local = 0.0
+    for idx, duration in enumerate(durations):
+        if seconds < start + duration:
+            scene = idx
+            local = seconds - start
+            break
+        start += duration
+    accent = CORAL if scene == 3 else GREEN if scene == 1 else CYAN
+    image = slides[scene].copy()
+    if scene < len(slides) - 1 and local > durations[scene] - 0.65:
+        amount = (local - durations[scene] + 0.65) / 0.65
+        image = Image.blend(image, slides[scene + 1], amount)
+    overlay = Image.new("RGBA", image.size)
+    d = ImageDraw.Draw(overlay)
+    sweep = seconds * 1.8
+    cx, cy = 1052, 459
+    x = cx + int(140 * math.cos(sweep))
+    y = cy + int(140 * math.sin(sweep))
+    d.line((cx, cy, x, y), fill=rgba(accent, 115), width=3)
+    d.ellipse((x - 6, y - 6, x + 6, y + 6), fill=rgba(accent, 215))
+    scan_y = 320 + int((seconds * 24) % 270)
+    d.line((74, scan_y, 855, scan_y), fill=rgba(CYAN, 24), width=2)
+    pulse = 130 + int(85 * (0.5 + 0.5 * math.sin(seconds * 5)))
+    d.ellipse((958, 58, 969, 69), fill=rgba(GREEN, pulse))
+    d.rounded_rectangle((48, 695, 1232, 700), 3, fill=rgba("#344c66"))
+    d.rounded_rectangle((48, 695, 48 + int(1184 * seconds / total), 700),
+                        3, fill=rgba(CYAN))
+    return Image.alpha_composite(image.convert("RGBA"), overlay).convert("RGB")
+
+
+def encode_video(slides: list[Image.Image], durations: list[int]) -> None:
+    ffmpeg = shutil.which("ffmpeg")
+    if not ffmpeg:
+        import imageio_ffmpeg
+        ffmpeg = imageio_ffmpeg.get_ffmpeg_exe()
+    fps = 15
+    command = [ffmpeg, "-y", "-loglevel", "error", "-f", "rawvideo",
+               "-pix_fmt", "rgb24", "-s", "1280x720", "-r", str(fps),
+               "-i", "-", "-an", "-c:v", "libx264", "-preset", "veryfast",
+               "-crf", "21", "-pix_fmt", "yuv420p", "-movflags", "+faststart",
+               str(OUT / "shell-root-escape-demo.mp4")]
+    proc = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.DEVNULL,
+                            stderr=subprocess.PIPE)
+    try:
+        assert proc.stdin is not None
+        for n in range(sum(durations) * fps):
+            proc.stdin.write(animated_frame(slides, durations, n / fps).tobytes())
+        proc.stdin.close()
+        assert proc.stderr is not None
+        error = proc.stderr.read().decode(errors="replace")
+        if proc.wait() != 0:
+            raise RuntimeError(error[-3000:])
+    finally:
+        if proc.poll() is None:
+            proc.kill()
+            proc.wait()
+
+
+def encode_preview(slides: list[Image.Image], durations: list[int]) -> None:
+    frames: list[Image.Image] = []
+    timing: list[int] = []
+    start = 0
+    for idx, duration in enumerate(durations):
+        still = animated_frame(slides, durations, start + duration / 2)
+        frames.append(still.resize((960, 540), Image.Resampling.LANCZOS)
+                      .quantize(colors=96))
+        timing.append(1600)
+        if idx < len(slides) - 1:
+            for amount in (0.25, 0.5, 0.75):
+                blend = Image.blend(slides[idx], slides[idx + 1], amount)
+                frames.append(blend.resize((960, 540), Image.Resampling.LANCZOS)
+                              .quantize(colors=96))
+                timing.append(120)
+        start += duration
+    frames[0].save(OUT / "shell-root-escape-preview.gif", save_all=True,
+                   append_images=frames[1:], duration=timing, loop=0,
+                   optimize=True, disposal=2)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--trace", type=Path, required=True)
@@ -79,7 +235,7 @@ def main() -> None:
     OUT.mkdir(parents=True, exist_ok=True)
     short_id = evidence["trace_id"][:12]
     slides = [
-        ("A failed tool call becomes evidence", "The problem", [
+        ("Make failures answerable.", "Trace intelligence", [
             ("A coding agent tried to read outside its workspace.", WHITE),
             ("The harness blocked it. What can we prove later?", AMBER),
             ("This demo follows one actual JSONL trace.", MUTED),
@@ -125,40 +281,11 @@ def main() -> None:
         ], "README → Demo and story for exact reproduction"),
     ]
     durations = [5, 7, 6, 6, 7, 7, 5, 5]
-    with tempfile.TemporaryDirectory() as temp:
-        tmp = Path(temp)
-        concat = []
-        preview_frames = []
-        for idx, ((title, kicker, lines, footer), seconds) in enumerate(zip(slides, durations), 1):
-            image = slide(idx, title, kicker, lines, footer)
-            file = tmp / f"slide-{idx:02}.png"
-            image.save(file)
-            preview_frames.append(
-                image.resize((960, 540), Image.Resampling.LANCZOS).quantize(colors=64)
-            )
-            concat += [f"file '{file}'", f"duration {seconds}"]
-            if idx == 1:
-                image.save(OUT / "shell-root-escape-poster.png")
-        preview_frames[0].save(
-            OUT / "shell-root-escape-preview.gif",
-            save_all=True,
-            append_images=preview_frames[1:],
-            duration=2400,
-            loop=0,
-            optimize=True,
-            disposal=2,
-        )
-        concat.append(f"file '{file}'")
-        manifest = tmp / "slides.txt"
-        manifest.write_text("\n".join(concat) + "\n")
-        ffmpeg = shutil.which("ffmpeg")
-        if not ffmpeg:
-            import imageio_ffmpeg
-            ffmpeg = imageio_ffmpeg.get_ffmpeg_exe()
-        subprocess.run([ffmpeg, "-y", "-f", "concat", "-safe", "0", "-i", str(manifest),
-                        "-vf", "fps=24,format=yuv420p", "-c:v", "libx264", "-crf", "23",
-                        "-movflags", "+faststart", str(OUT / "shell-root-escape-demo.mp4")],
-                       check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    images = [slide(idx, title, kicker, lines, footer)
+              for idx, (title, kicker, lines, footer) in enumerate(slides, 1)]
+    images[0].save(OUT / "shell-root-escape-poster.png")
+    encode_preview(images, durations)
+    encode_video(images, durations)
     print(OUT / "shell-root-escape-demo.mp4")
 
 

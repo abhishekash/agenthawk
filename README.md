@@ -9,7 +9,11 @@ OpenTelemetry spans emitted by agent runs. It exposes focused queries for
 run summaries, tool failures, approvals, activity, and comparisons instead of
 requiring an application-specific dashboard.
 
-[![Animated demo: the shell-boundary error recovered from an agent trace](docs/media/shell-root-escape-preview.gif)](docs/media/shell-root-escape-demo.mp4)
+<p align="center">
+  <a href="docs/media/shell-root-escape-demo.mp4">
+    <img src="docs/media/shell-root-escape-preview.gif" width="960" alt="Animated demo: a blocked tool call becomes an inspectable trace" />
+  </a>
+</p>
 
 **Demo:** [Watch the full 48-second video](docs/media/shell-root-escape-demo.mp4) · [Read the reproducible story](docs/shell-boundary-story.md). This is a scripted regression trace, not a live-model benchmark.
 
