@@ -91,8 +91,8 @@ def slide(number: int, title: str, kicker: str, lines: list[tuple[str, str]],
     d = ImageDraw.Draw(im)
     d.line((48, 102, 1232, 102), fill="#365474", width=2)
     d.rounded_rectangle((48, 40, 97, 86), 10, fill="#103e4b", outline=CYAN, width=2)
-    d.text((63, 47), "M", font=font(25, headline=True), fill=CYAN)
-    d.text((115, 50), "MCP / TRACE INSPECTOR", font=font(19), fill=WHITE)
+    d.text((63, 47), "S", font=font(25, headline=True), fill=CYAN)
+    d.text((115, 50), "SPANHOUND / TRACE READER", font=font(19), fill=WHITE)
     d.ellipse((958, 58, 969, 69), fill=GREEN)
     d.text((981, 54), "REAL TRACE • STDIO MCP", font=font(16), fill=MUTED)
     d.rounded_rectangle((65, 126, 65 + 19 * len(kicker), 159), 10,
@@ -271,11 +271,11 @@ def main() -> None:
         ], "Query verified against the generated trace"),
         ("One failure, two checks", "what this proves", [
             ("agent-evals scores the runtime contract", GREEN),
-            ("mcp-trace-inspector retrieves the diagnostic", GREEN),
+            ("spanhound retrieves the diagnostic", GREEN),
             ("The trace is the shared evidence between them", WHITE),
         ], "This does not measure a live model's success rate"),
         ("Try it on your own trace", "open source", [
-            ("github.com/abhishekash/mcp-trace-inspector", CYAN),
+            ("github.com/abhishekash/spanhound", CYAN),
             ("github.com/abhishekash/agent-evals", CYAN),
             ("JSONL spans in. Answerable failures out.", WHITE),
         ], "README → Demo and story for exact reproduction"),

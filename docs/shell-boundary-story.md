@@ -41,11 +41,10 @@ The last two fields come from a `hitl.decision` event on that span. They describ
 
 ## Ask the trace
 
-Run [mcp-trace-inspector](https://github.com/abhishekash/mcp-trace-inspector) against the output directory:
+Run [spanhound](https://github.com/abhishekash/spanhound) against the output directory:
 
 ```bash
-uvx --from git+https://github.com/abhishekash/mcp-trace-inspector@v0.3.0 \
-  mcp-trace-inspector --trace-dir /tmp/shell-root-escape-demo/traces
+uvx spanhound --trace-dir /tmp/shell-root-escape-demo/traces
 ```
 
 An MCP client can call `search_spans` with `needle: "shell path escapes"`. In the reproduced trace, it returns the `tool.call` span and the matching diagnostic. `failure_report` gives a broader view of failed calls; `approval_log` exposes the decision evidence. The inspector reads local JSONL spans and returns bounded, redacted query results. It does not watch the agent's screen or infer intent from the final answer.
@@ -58,10 +57,10 @@ If you already emit OTel-shaped JSONL spans, I would like to hear whether these 
 
 **Show HN title:** Show HN: I built an MCP server to ask agent traces why a tool failed
 
-**Show HN text:** A coding-agent regression tried `cat ../outside.txt`. The harness blocked it, but the trace originally lacked the returned diagnostic. I added result/error recording, made a scripted regression in agent-evals, and built mcp-trace-inspector to query the JSONL spans over stdio MCP. The 48-second demo follows the real generated trace. The scripted pass tests the runtime contract, not live-model reliability. I would value feedback on the tool schema and which trace questions are still awkward. Demo: https://github.com/abhishekash/mcp-trace-inspector/blob/main/docs/media/shell-root-escape-demo.mp4
+**Show HN text:** A coding-agent regression tried `cat ../outside.txt`. The harness blocked it, but the trace originally lacked the returned diagnostic. I added result/error recording, made a scripted regression in agent-evals, and built spanhound to query the JSONL spans over stdio MCP. The 48-second demo follows the real generated trace. The scripted pass tests the runtime contract, not live-model reliability. I would value feedback on the tool schema and which trace questions are still awkward. Demo: https://github.com/abhishekash/spanhound/blob/main/docs/media/shell-root-escape-demo.mp4
 
 **Reddit title:** I made a local MCP server that lets an agent inspect its own failed tool calls
 
-**Reddit text:** I hit a concrete observability gap while testing a workspace-boundary failure: the harness stopped `cat ../outside.txt`, but the old trace did not preserve the returned diagnostic. I fixed the trace, added a deterministic regression, and made an MCP reader with `search_spans`, `failure_report`, and `approval_log`. Here is a 48-second captioned run-through and a reproducible task: https://github.com/abhishekash/mcp-trace-inspector/blob/main/docs/shell-boundary-story.md . This is a scripted safety test, not a live-model benchmark. What failure evidence do you wish your agent traces kept?
+**Reddit text:** I hit a concrete observability gap while testing a workspace-boundary failure: the harness stopped `cat ../outside.txt`, but the old trace did not preserve the returned diagnostic. I fixed the trace, added a deterministic regression, and made an MCP reader with `search_spans`, `failure_report`, and `approval_log`. Here is a 48-second captioned run-through and a reproducible task: https://github.com/abhishekash/spanhound/blob/main/docs/shell-boundary-story.md . This is a scripted safety test, not a live-model benchmark. What failure evidence do you wish your agent traces kept?
 
 Post these in relevant communities only after checking their current self-promotion rules and choosing one concrete feedback question.

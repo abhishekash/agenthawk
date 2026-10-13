@@ -1,13 +1,13 @@
-# mcp-trace-inspector
+# SpanHound
 
-<!-- mcp-name: io.github.abhishekash/mcp-trace-inspector -->
+<!-- mcp-name: io.github.abhishekash/spanhound -->
 
-[![CI](https://github.com/abhishekash/mcp-trace-inspector/actions/workflows/ci.yml/badge.svg)](https://github.com/abhishekash/mcp-trace-inspector/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![CI](https://github.com/abhishekash/spanhound/actions/workflows/ci.yml/badge.svg)](https://github.com/abhishekash/spanhound/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-**Inspect recorded agent-run failures and approvals from local JSONL.**
-mcp-trace-inspector is a read-only stdio MCP server for inspecting local
+**Inspect recorded agent-run failures and approvals from local trace files.**
+SpanHound (formerly mcp-trace-inspector) is a read-only stdio MCP server for inspecting local
 agent-run traces, including tool failures, approval decisions, and changes
-between runs. It reads JSONL spans in the format described in the
+between runs. It reads JSONL spans and OTLP JSON exports as described in the
 [user guide](docs/user-guide.md), including traces from
 [agent-harness](https://github.com/abhishekash/agent-harness).
 
@@ -21,32 +21,29 @@ between runs. It reads JSONL spans in the format described in the
 
 The project's concrete origin was a shell-boundary regression: the harness blocked
 `cat ../outside.txt`, but the old trace recorded only that `run_shell` was
-called, not the returned diagnostic. mcp-trace-inspector and the harness now preserve and
+called, not the returned diagnostic. SpanHound and the harness now preserve and
 query that bounded error.
 
 ## Try the included trace
 
 ```bash
-git clone https://github.com/abhishekash/mcp-trace-inspector.git
-cd mcp-trace-inspector
-uvx --from . mcp-trace-inspector --trace-dir examples --check
+git clone https://github.com/abhishekash/spanhound.git
+cd spanhound
+uvx --from . spanhound --trace-dir examples --check
 ```
 
 `--check` prints JSON with the trace directory, span count, and recent run
 summaries, then exits. It also reports a missing directory or malformed complete
-JSONL record. To ask questions through MCP, connect a client using the
+JSONL or OTLP JSON record. To ask questions through MCP, connect a client using the
 [configuration below](#client-configuration).
 
-> **Release status:** The `0.3.0` GitHub release is available. The PyPI
-> Trusted Publisher is configured; its first upload has not completed. Run the
-> tagged Git source with `uvx` below until `uvx mcp-trace-inspector` is available.
-> The [MCP Registry entry](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.abhishekash%2Fmcp-trace-inspector/versions)
-> currently lists the earlier `0.2.2` package.
-> [Publication status and directory submission handoff](docs/directory-submission.md).
+To try an OTLP JSON export, run the same command with `--trace-dir tests/fixtures`.
+The [sample export](tests/fixtures/otlp_trace.json) includes a model call, token
+usage, a tool call, and an exception.
 
 ## Where it fits
 
-Use this when your agent already writes the [supported JSONL span format](docs/user-guide.md#requirements)
+Use this when your agent already writes the [supported JSONL span format or OTLP JSON export](docs/user-guide.md#requirements)
 and you want an MCP client to inspect those files without setting up a trace
 backend. Its focused queries include recorded approval decisions, bounded
 failure diagnostics, and comparisons between selected runs.
@@ -62,8 +59,8 @@ such as [OpenTelemetry MCP Server](https://github.com/traceloop/opentelemetry-mc
 For standard OTLP traces with a local receiver, see
 [otel-mcp](https://github.com/moondef/otel-mcp). For a trace UI, instrumentation,
 and evaluations, see [Phoenix](https://github.com/Arize-ai/phoenix).
-This project does not ingest OTLP directly or read arbitrary OpenTelemetry
-JSON exports; other producers may need an adapter to the documented format.
+This project reads saved OTLP/JSON trace exports. It does not receive live OTLP
+traffic or read backend-specific JSON exports.
 
 ## AI-native use cases
 
@@ -82,11 +79,11 @@ The tools read stored traces and can poll files being written, but they do not p
 ## Install & run
 
 ```bash
-uvx --from git+https://github.com/abhishekash/mcp-trace-inspector@v0.3.0 mcp-trace-inspector --trace-dir ./traces
+uvx spanhound --trace-dir ./traces
 # or, for local development:
-git clone https://github.com/abhishekash/mcp-trace-inspector
-cd mcp-trace-inspector
-uvx --from . mcp-trace-inspector --trace-dir ./traces
+git clone https://github.com/abhishekash/spanhound
+cd spanhound
+uvx --from . spanhound --trace-dir ./traces
 ```
 
 ## Client configuration
@@ -98,7 +95,7 @@ uvx --from . mcp-trace-inspector --trace-dir ./traces
   "mcpServers": {
     "agent-traces": {
       "command": "uvx",
-      "args": ["--from", "git+https://github.com/abhishekash/mcp-trace-inspector@v0.3.0", "mcp-trace-inspector", "--trace-dir", "/path/to/traces"]
+      "args": ["spanhound", "--trace-dir", "/path/to/traces"]
     }
   }
 }
@@ -111,7 +108,7 @@ uvx --from . mcp-trace-inspector --trace-dir ./traces
   "mcpServers": {
     "agent-traces": {
       "command": "uvx",
-      "args": ["--from", "git+https://github.com/abhishekash/mcp-trace-inspector@v0.3.0", "mcp-trace-inspector", "--trace-dir", "/path/to/traces"]
+      "args": ["spanhound", "--trace-dir", "/path/to/traces"]
     }
   }
 }
@@ -120,7 +117,7 @@ uvx --from . mcp-trace-inspector --trace-dir ./traces
 **agent-harness** (mounted as gated tools):
 
 ```bash
-harness run "Why was my last run slow?" --mcp "uvx --from git+https://github.com/abhishekash/mcp-trace-inspector@v0.3.0 mcp-trace-inspector --trace-dir ./traces"
+harness run "Why was my last run slow?" --mcp "uvx spanhound --trace-dir ./traces"
 ```
 
 ## Tools
@@ -157,11 +154,12 @@ Tool descriptions are written as prompts (when-to-use, not just what-it-does) �
 ## Design
 
 ```
-traces/*.jsonl ──▶ mcp_trace.core (pure query functions, zero deps)
+traces/*.jsonl ──┐
+traces/*.json  ──┴─▶ mcp_trace.core (local query functions)
                           │
-                   mcp_trace.server (thin MCPServer adapter, mcp 2.x)
+                   mcp_trace.server (MCP adapter)
                           │
-                    stdio (NDJSON JSON-RPC)
+                    stdio (JSON-RPC)
 ```
 
 - **core/server split**: all logic is pure functions over parsed spans; the MCP layer only parses args and JSON-encodes results. Tests hit both layers.
