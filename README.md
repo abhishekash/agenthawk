@@ -10,8 +10,8 @@ run summaries, tool failures, approvals, activity, and comparisons instead of
 requiring an application-specific dashboard.
 
 > **Release status:** The `0.3.0` GitHub release is available, but the new PyPI
-> distribution is pending Trusted Publisher registration. Until publication
-> succeeds, install from this checkout; `uvx mcp-trace-inspector` will not work.
+> distribution is pending Trusted Publisher registration. Run the tagged Git
+> source with `uvx` below until `uvx mcp-trace-inspector` is available.
 
 It pairs with [agent-harness](https://github.com/abhishekash/agent-harness),
 but the reader is format-simple: any JSONL of OTel-shaped spans works. The
@@ -37,7 +37,7 @@ The tools read stored traces and can poll files being written, but they do not p
 ## Install & run
 
 ```bash
-uvx mcp-trace-inspector --trace-dir ./traces
+uvx --from git+https://github.com/abhishekash/mcp-trace-inspector@v0.3.0 mcp-trace-inspector --trace-dir ./traces
 # or, for local development:
 git clone https://github.com/abhishekash/mcp-trace-inspector
 cd mcp-trace-inspector && uv pip install -e .
@@ -53,7 +53,7 @@ mcp-trace-inspector --trace-dir ./traces
   "mcpServers": {
     "agent-traces": {
       "command": "uvx",
-      "args": ["mcp-trace-inspector", "--trace-dir", "/path/to/traces"]
+      "args": ["--from", "git+https://github.com/abhishekash/mcp-trace-inspector@v0.3.0", "mcp-trace-inspector", "--trace-dir", "/path/to/traces"]
     }
   }
 }
@@ -66,7 +66,7 @@ mcp-trace-inspector --trace-dir ./traces
   "mcpServers": {
     "agent-traces": {
       "command": "uvx",
-      "args": ["mcp-trace-inspector", "--trace-dir", "/path/to/traces"]
+      "args": ["--from", "git+https://github.com/abhishekash/mcp-trace-inspector@v0.3.0", "mcp-trace-inspector", "--trace-dir", "/path/to/traces"]
     }
   }
 }
@@ -75,7 +75,7 @@ mcp-trace-inspector --trace-dir ./traces
 **agent-harness** (mounted as gated tools):
 
 ```bash
-harness run "Why was my last run slow?" --mcp "uvx mcp-trace-inspector --trace-dir ./traces"
+harness run "Why was my last run slow?" --mcp "uvx --from git+https://github.com/abhishekash/mcp-trace-inspector@v0.3.0 mcp-trace-inspector --trace-dir ./traces"
 ```
 
 ## Tools

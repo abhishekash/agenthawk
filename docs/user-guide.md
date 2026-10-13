@@ -35,11 +35,11 @@ export adapter to map their OTel export format into these JSONL span records.
 
 ## Install and start
 
-After the new distribution is published to PyPI, `uvx` will run it without a
-project checkout (see the [release status](../README.md)):
+Until the new distribution is published to PyPI, `uvx` can run the tagged Git
+source without a project checkout (see the [release status](../README.md)):
 
 ```bash
-uvx --from mcp-trace-inspector==0.3.0 mcp-trace-inspector --trace-dir /absolute/path/to/traces
+uvx --from git+https://github.com/abhishekash/mcp-trace-inspector@v0.3.0 mcp-trace-inspector --trace-dir /absolute/path/to/traces
 ```
 
 The server speaks MCP over standard input and output, so this command waits for
@@ -60,7 +60,7 @@ mcp-trace-inspector --trace-dir /absolute/path/to/traces
 You can also set `MCP_TRACE_DIR` and omit `--trace-dir`:
 
 ```bash
-MCP_TRACE_DIR=/absolute/path/to/traces uvx --from mcp-trace-inspector==0.3.0 mcp-trace-inspector
+MCP_TRACE_DIR=/absolute/path/to/traces uvx --from git+https://github.com/abhishekash/mcp-trace-inspector@v0.3.0 mcp-trace-inspector
 ```
 
 The server is local and read-only. Connecting an MCP client gives that client
@@ -82,7 +82,7 @@ For clients using the `mcpServers` JSON format, the entry looks like this:
       "command": "uvx",
       "args": [
         "--from",
-        "mcp-trace-inspector==0.3.0",
+        "git+https://github.com/abhishekash/mcp-trace-inspector@v0.3.0",
         "mcp-trace-inspector",
         "--trace-dir",
         "/absolute/path/to/traces"
@@ -154,7 +154,7 @@ mcp-trace-inspector can run as a stdio MCP server mounted by `agent-harness`:
 
 ```bash
 harness run "Inspect the last run and explain its failure" \
-  --mcp "uvx --from mcp-trace-inspector==0.3.0 mcp-trace-inspector --trace-dir ./traces" \
+  --mcp "uvx --from git+https://github.com/abhishekash/mcp-trace-inspector@v0.3.0 mcp-trace-inspector --trace-dir ./traces" \
   --approve cli
 ```
 
