@@ -4,7 +4,7 @@
 
 [![CI](https://github.com/abhishekash/mcp-trace-inspector/actions/workflows/ci.yml/badge.svg)](https://github.com/abhishekash/mcp-trace-inspector/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-**Ask your agent what happened in a recorded local run.**
+**Inspect recorded agent-run failures and approvals from local JSONL.**
 mcp-trace-inspector is a read-only stdio MCP server for inspecting local
 agent-run traces, including tool failures, approval decisions, and changes
 between runs. It reads JSONL spans in the format described in the
@@ -50,6 +50,12 @@ Use this when your agent already writes the [supported JSONL span format](docs/u
 and you want an MCP client to inspect those files without setting up a trace
 backend. Its focused queries include recorded approval decisions, bounded
 failure diagnostics, and comparisons between selected runs.
+
+[MCP Agent Trace Inspector](https://github.com/dbsectrainer/mcp-agent-trace-inspector)
+records steps into a local SQLite database and provides a dashboard and
+exports. Use it when you need trace capture. This project reads trace files
+written by an existing producer, including agent-harness; it does not record
+the agent's actions itself.
 
 For traces stored in Jaeger, Tempo, or Traceloop, use a backend-connected tool
 such as [OpenTelemetry MCP Server](https://github.com/traceloop/opentelemetry-mcp-server).
