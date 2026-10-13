@@ -4,10 +4,11 @@
 
 [![CI](https://github.com/abhishekash/spanhound/actions/workflows/ci.yml/badge.svg)](https://github.com/abhishekash/spanhound/actions/workflows/ci.yml) [![PyPI](https://img.shields.io/pypi/v/spanhound)](https://pypi.org/project/spanhound/) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-**Inspect recorded agent-run failures and approvals from local trace files.**
-SpanHound (formerly mcp-trace-inspector) is a read-only stdio MCP server for inspecting local
-agent-run traces, including tool failures, approval decisions, and changes
-between runs. It reads JSONL spans and OTLP JSON exports as described in the
+**Capture local OpenTelemetry traces and inspect agent-run failures and approvals.**
+SpanHound (formerly mcp-trace-inspector) is a local OTLP/HTTP trace receiver and
+stdio MCP server for inspecting agent-run traces, including tool failures,
+approval decisions, and changes between runs. Its MCP tools read JSONL spans
+and OTLP JSON exports as described in the
 [user guide](docs/user-guide.md), including traces from
 [agent-harness](https://github.com/abhishekash/agent-harness).
 
@@ -65,6 +66,29 @@ To try an OTLP JSON export, run the same command with `--trace-dir tests/fixture
 The [sample export](tests/fixtures/otlp_trace.json) includes a model call, token
 usage, a tool call, and an exception.
 
+## Capture your own traces
+
+Start the receiver in one terminal:
+
+```bash
+uvx spanhound collect --trace-dir ./traces
+```
+
+Point an agent that **already uses an OpenTelemetry trace exporter** at the
+receiver, then run the agent:
+
+```bash
+export OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://127.0.0.1:4318/v1/traces
+export OTEL_EXPORTER_OTLP_TRACES_PROTOCOL=http/protobuf
+# Start your instrumented agent here.
+```
+
+SpanHound stores each accepted OTLP/HTTP trace request as a local JSON file.
+Run `uvx spanhound --trace-dir ./traces --check` to see the captured runs, then
+connect your MCP client to that folder. The receiver accepts OTLP/HTTP JSON or
+protobuf on loopback; it does not add instrumentation to an agent. See the
+[capture guide](docs/user-guide.md#capture-otlp-traces) for limits and privacy.
+
 ## Where it fits
 
 Use this when your agent already writes the [supported JSONL span format or OTLP JSON export](docs/user-guide.md#requirements)
@@ -74,17 +98,15 @@ failure diagnostics, and comparisons between selected runs.
 
 [MCP Agent Trace Inspector](https://github.com/dbsectrainer/mcp-agent-trace-inspector)
 records steps into a local SQLite database and provides a dashboard and
-exports. Use it when you need trace capture. This project reads trace files
-written by an existing producer, including agent-harness; it does not record
-the agent's actions itself.
+exports. SpanHound receives standard OTLP/HTTP traces from an instrumented
+agent and queries the captured files through MCP. It does not instrument the
+agent or record its actions by itself.
 
 For traces stored in Jaeger, Tempo, or Traceloop, use a backend-connected tool
 such as [OpenTelemetry MCP Server](https://github.com/traceloop/opentelemetry-mcp-server).
-For standard OTLP traces with a local receiver, see
-[otel-mcp](https://github.com/moondef/otel-mcp). For a trace UI, instrumentation,
-and evaluations, see [Phoenix](https://github.com/Arize-ai/phoenix).
-This project reads saved OTLP/JSON trace exports. It does not receive live OTLP
-traffic or read backend-specific JSON exports.
+For a trace UI, instrumentation, and evaluations, see
+[Phoenix](https://github.com/Arize-ai/phoenix). SpanHound does not read
+backend-specific JSON exports.
 
 ## AI-native use cases
 
@@ -112,7 +134,10 @@ uvx --from . spanhound --trace-dir ./traces
 
 For a desktop client that accepts [MCP Bundles](https://github.com/modelcontextprotocol/mcpb),
 download the `.mcpb` asset from the [latest release](https://github.com/abhishekash/spanhound/releases/latest)
-and open it in the client. The bundle asks you to choose a local trace folder.
+and install the downloaded file in the client; the download link does not open
+a web page. In Claude Desktop, use **Settings → Extensions → Advanced settings →
+Install Extension…** and select the `.mcpb` file. The bundle asks you to choose
+a local trace folder.
 It uses UV to install its Python dependencies on first run. SpanHound reads
 the folder locally; the connected client receives the evidence returned by its
 MCP tools.

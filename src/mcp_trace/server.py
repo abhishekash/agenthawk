@@ -74,6 +74,8 @@ def _demo() -> None:
     print("\nThis trace came from a scripted agent-evals regression.")
     print("Inspect your own JSONL or OTLP JSON traces with:")
     print("  uvx spanhound --trace-dir /path/to/traces --check")
+    print("To capture traces from an instrumented agent, start:")
+    print("  uvx spanhound collect --trace-dir ./traces")
 
 
 @mcp.tool()
@@ -176,12 +178,12 @@ def compare_runs(trace_ids: list[str]) -> str:
 
 def main() -> None:
     global _trace_dir
-    parser = argparse.ArgumentParser(description="MCP server for agent self-observability")
+    parser = argparse.ArgumentParser(description="Inspect and collect local agent traces")
     parser.add_argument(
         "command",
         nargs="?",
-        choices=("demo",),
-        help="demo: inspect a bundled recorded agent failure without setup",
+        choices=("demo", "collect"),
+        help="demo: inspect a bundled failure; collect: receive local OTLP/HTTP traces",
     )
     parser.add_argument(
         "--trace-dir",
@@ -193,6 +195,12 @@ def main() -> None:
         action="store_true",
         help="validate the trace directory and print recent run summaries, then exit",
     )
+    parser.add_argument(
+        "--port",
+        type=int,
+        default=4318,
+        help="loopback OTLP/HTTP port for collect (default: 4318)",
+    )
     args = parser.parse_args()
     if args.command == "demo":
         if args.check:
@@ -200,6 +208,16 @@ def main() -> None:
         _demo()
         return
     _trace_dir = Path(args.trace_dir).resolve()
+    if args.command == "collect":
+        if args.check:
+            parser.error("collect and --check cannot be used together")
+        from mcp_trace.collector import serve
+
+        try:
+            serve(_trace_dir, args.port)
+        except (OSError, ValueError) as exc:
+            parser.error(str(exc))
+        return
     if args.check:
         try:
             spans = core.load_trace_dir(_trace_dir)

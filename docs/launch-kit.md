@@ -1,9 +1,9 @@
 # SpanHound launch kit
 
-SpanHound is an MIT-licensed, read-only stdio MCP server for **saved local agent
-traces**. It reads the supported JSONL spans and saved OTLP JSON exports, then
-answers questions about recorded tool errors, approvals, token usage, and run
-changes. It does not capture agent activity or receive live OTLP traffic.
+SpanHound is an MIT-licensed local OTLP/HTTP receiver and read-only stdio MCP
+server for **agent traces**. It captures standard traces from instrumented agents
+or reads saved JSONL spans and OTLP JSON exports, then answers questions about
+recorded tool errors, approvals, token usage, and run changes.
 
 ## One-line demonstration
 
@@ -46,10 +46,12 @@ unrelated issues and discussions.
 **Text:** A regression agent tried `cat ../outside.txt`. The tool blocked it,
 but the trace initially recorded only the call, not the returned error. I fixed
 the trace and built SpanHound, a local read-only MCP server that can query saved
-JSONL spans and OTLP JSON exports for failures and approval decisions.
+JSONL spans and OTLP JSON exports for failures and approval decisions. It can
+also receive OTLP/HTTP traces locally from an instrumented agent.
 
 You can see the bundled scripted case with `uvx spanhound demo` (no MCP client
-needed), then point it at your own supported trace files. The 48-second video
+needed), then point it at your own supported trace files or send OTLP/HTTP
+traces to `spanhound collect`. The 48-second video
 and formats are in the repo: https://github.com/abhishekash/spanhound
 
 If you debug MCP tool failures, which piece of evidence do your traces most
@@ -65,9 +67,10 @@ often fail to keep?
 its workspace. The tool blocked the call, but our old trace only said the call
 happened. I added the returned diagnostic and approval event to the trace, then
 made a read-only MCP server to query that evidence from local JSONL spans or
-saved OTLP JSON exports. `uvx spanhound demo` shows the bundled scripted trace
+OTLP JSON exports. `uvx spanhound collect` can receive OTLP/HTTP traces from
+an instrumented agent. `uvx spanhound demo` shows the bundled scripted trace
 without setup; the README has the 48-second video and exact format requirements.
-It reads existing files and does not capture live traffic. I would value
+It stores local OTLP/HTTP requests as files. I would value
 feedback on which failure or approval questions are hard to answer from your
 current agent traces.
 
@@ -83,7 +86,7 @@ was called. That was too little evidence to explain the result later.
 
 I fixed the harness trace and built SpanHound to inspect saved local trace
 files through read-only MCP tools. It reads the supported JSONL span format and
-saved OTLP JSON exports. A client can ask for failed calls, recorded approvals,
+saved OTLP JSON exports, and can receive local OTLP/HTTP traces. A client can ask for failed calls, recorded approvals,
 token use, or differences between runs.
 
 Try the exact case with `uvx spanhound demo`. It prints the blocked call, the
@@ -95,13 +98,13 @@ trust an agent's explanation of a failed tool call?
 
 ### r/Observability
 
-**Title:** A local reader for saved AI-agent traces that keeps the returned tool error
+**Title:** A local OTLP receiver for AI-agent traces that keeps the returned tool error
 
 **Text:** I was testing an agent workspace-boundary case: `run_shell` blocked
 `cat ../outside.txt`, but the original trace recorded the call without its
 returned diagnostic. I fixed that and made SpanHound to query existing local
-agent traces through MCP. It reads the supported JSONL spans and saved OTLP
-JSON exports; it is not an OTLP receiver or a replacement for Jaeger/Tempo.
+agent traces through MCP. It reads supported JSONL spans and OTLP JSON exports,
+and receives OTLP/HTTP traces locally from an instrumented agent.
 
 The scripted case runs with `uvx spanhound demo`, and the repo includes the
 48-second walkthrough: https://github.com/abhishekash/spanhound
