@@ -9,6 +9,10 @@ OpenTelemetry spans emitted by agent runs. It exposes focused queries for
 run summaries, tool failures, approvals, activity, and comparisons instead of
 requiring an application-specific dashboard.
 
+[![Animated demo: the shell-boundary error recovered from an agent trace](docs/media/shell-root-escape-preview.gif)](docs/media/shell-root-escape-demo.mp4)
+
+**Demo:** [Watch the full 48-second video](docs/media/shell-root-escape-demo.mp4) · [Read the reproducible story](docs/shell-boundary-story.md). This is a scripted regression trace, not a live-model benchmark.
+
 > **Release status:** The `0.3.0` GitHub release is available, but the new PyPI
 > distribution is pending Trusted Publisher registration. Run the tagged Git
 > source with `uvx` below until `uvx mcp-trace-inspector` is available.
@@ -36,12 +40,6 @@ query that bounded error.
 | "Did this model/version regress?" | `compare_runs` | Cost, latency, tokens, tool calls, and failure deltas. |
 
 The tools read stored traces and can poll files being written, but they do not push events or infer intent from the final answer. Start with the [installation and user guide](docs/user-guide.md), then see the [real trace fixture](examples/example_trace.jsonl) and the [tool descriptions](src/mcp_trace/server.py) for the query contract.
-
-## Demo and story
-
-[![Watch the shell-boundary demo](docs/media/shell-root-escape-poster.png)](docs/media/shell-root-escape-demo.mp4)
-
-[Watch the 48-second captioned demo](docs/media/shell-root-escape-demo.mp4) and read [the reproducible story](docs/shell-boundary-story.md). It follows a real trace from the scripted `shell-root-escape` regression in `agent-evals`: an attempted `cat ../outside.txt`, the harness's exact boundary error, and the inspector query that retrieves it. The scripted pass checks runtime behavior; it is not a live-model benchmark.
 
 ## Install & run
 

@@ -128,13 +128,26 @@ def main() -> None:
     with tempfile.TemporaryDirectory() as temp:
         tmp = Path(temp)
         concat = []
+        preview_frames = []
         for idx, ((title, kicker, lines, footer), seconds) in enumerate(zip(slides, durations), 1):
             image = slide(idx, title, kicker, lines, footer)
             file = tmp / f"slide-{idx:02}.png"
             image.save(file)
+            preview_frames.append(
+                image.resize((960, 540), Image.Resampling.LANCZOS).quantize(colors=64)
+            )
             concat += [f"file '{file}'", f"duration {seconds}"]
             if idx == 1:
                 image.save(OUT / "shell-root-escape-poster.png")
+        preview_frames[0].save(
+            OUT / "shell-root-escape-preview.gif",
+            save_all=True,
+            append_images=preview_frames[1:],
+            duration=2400,
+            loop=0,
+            optimize=True,
+            disposal=2,
+        )
         concat.append(f"file '{file}'")
         manifest = tmp / "slides.txt"
         manifest.write_text("\n".join(concat) + "\n")
