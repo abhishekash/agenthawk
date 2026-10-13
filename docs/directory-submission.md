@@ -6,7 +6,7 @@ Status checked 2026-10-13. The server is public and installable from its `v0.3.0
 
 The `v0.3.0` release's [PyPI workflow](https://github.com/abhishekash/mcp-trace-inspector/actions/runs/38255591475) built successfully, then PyPI rejected its upload: `403 Invalid API Token: OIDC scoped token is not valid for project 'mcp-trace-inspector'`. A [retry](https://github.com/abhishekash/mcp-trace-inspector/actions/runs/38402523257) failed the same way. The Registry job was skipped because it depends on that upload.
 
-The PyPI account already has an empty `mcp-trace-inspector` project. Its `publish-pypi.yml` publisher overlaps with a publisher for `agenthawk` that uses the same GitHub repository and workflow. Add a distinct **project Trusted Publisher** to `mcp-trace-inspector` with these fields:
+The PyPI account already has an empty `mcp-trace-inspector` project. Its former `publish-pypi.yml` publisher overlapped with a publisher for `agenthawk` that used the same GitHub repository and workflow. A distinct **project Trusted Publisher** has now been added to `mcp-trace-inspector` with these fields:
 
 | Field | Value |
 |---|---|
@@ -15,7 +15,7 @@ The PyPI account already has an empty `mcp-trace-inspector` project. Its `publis
 | Workflow filename | `publish-mcp-trace-inspector.yml` |
 | Environment | `pypi` |
 
-Then dispatch [`publish-mcp-trace-inspector.yml`](../.github/workflows/publish-mcp-trace-inspector.yml) with `tag=v0.3.0`. It checks out that tag, uploads the distribution, and publishes its Registry metadata after upload succeeds. Future releases use this workflow automatically. Verify both the [PyPI project](https://pypi.org/project/mcp-trace-inspector/) and [Registry namespace](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.abhishekash%2Fmcp-trace-inspector/versions) afterward.
+The remaining release step is to dispatch [`publish-mcp-trace-inspector.yml`](../.github/workflows/publish-mcp-trace-inspector.yml) with `tag=v0.3.0`. It checks out that tag, uploads the distribution, and publishes its Registry metadata after upload succeeds. Future releases use this workflow automatically. Verify both the [PyPI project](https://pypi.org/project/mcp-trace-inspector/) and [Registry namespace](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.abhishekash%2Fmcp-trace-inspector/versions) afterward.
 
 ## `awesome-mcp-servers` submission
 

@@ -4,9 +4,10 @@
 
 [![CI](https://github.com/abhishekash/mcp-trace-inspector/actions/workflows/ci.yml/badge.svg)](https://github.com/abhishekash/mcp-trace-inspector/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-**Ask your agent why a run failed, slowed down, or acted after an approval.**
-mcp-trace-inspector is a local stdio MCP server that lets an MCP client query
-agent-run traces. It reads JSONL spans in the format described in the
+**Ask your agent what happened in a recorded local run.**
+mcp-trace-inspector is a read-only stdio MCP server for inspecting local
+agent-run traces, including tool failures, approval decisions, and changes
+between runs. It reads JSONL spans in the format described in the
 [user guide](docs/user-guide.md), including traces from
 [agent-harness](https://github.com/abhishekash/agent-harness).
 
@@ -36,12 +37,27 @@ summaries, then exits. It also reports a missing directory or malformed complete
 JSONL record. To ask questions through MCP, connect a client using the
 [configuration below](#client-configuration).
 
-> **Release status:** The `0.3.0` GitHub release is available, but the new PyPI
-> distribution is pending Trusted Publisher registration. Run the tagged Git
-> source with `uvx` below until `uvx mcp-trace-inspector` is available.
+> **Release status:** The `0.3.0` GitHub release is available. The PyPI
+> Trusted Publisher is configured; its first upload has not completed. Run the
+> tagged Git source with `uvx` below until `uvx mcp-trace-inspector` is available.
 > The [MCP Registry entry](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.abhishekash%2Fmcp-trace-inspector/versions)
 > currently lists the earlier `0.2.2` package.
 > [Publication status and directory submission handoff](docs/directory-submission.md).
+
+## Where it fits
+
+Use this when your agent already writes the [supported JSONL span format](docs/user-guide.md#requirements)
+and you want an MCP client to inspect those files without setting up a trace
+backend. Its focused queries include recorded approval decisions, bounded
+failure diagnostics, and comparisons between selected runs.
+
+For traces stored in Jaeger, Tempo, or Traceloop, use a backend-connected tool
+such as [OpenTelemetry MCP Server](https://github.com/traceloop/opentelemetry-mcp-server).
+For standard OTLP traces with a local receiver, see
+[otel-mcp](https://github.com/moondef/otel-mcp). For a trace UI, instrumentation,
+and evaluations, see [Phoenix](https://github.com/Arize-ai/phoenix).
+This project does not ingest OTLP directly or read arbitrary OpenTelemetry
+JSON exports; other producers may need an adapter to the documented format.
 
 ## AI-native use cases
 
