@@ -11,6 +11,7 @@ import argparse
 import json
 import os
 import sys
+from importlib.resources import as_file, files
 from pathlib import Path
 
 from mcp.server.mcpserver import MCPServer
@@ -54,6 +55,25 @@ def _resolve(trace_id: str) -> list[dict]:
 
 def _dump(obj) -> str:
     return json.dumps(obj, indent=2, ensure_ascii=False, default=str)
+
+
+def _demo() -> None:
+    """Show a recorded failure from the bundled scripted regression trace."""
+    resource = files("mcp_trace").joinpath("data", "shell-root-escape.jsonl")
+    with as_file(resource) as path:
+        spans = core.load_spans(path)
+    run = core.list_runs(spans)[0]
+    failure = core.failure_report(spans)[0]
+    decision = core.approval_log(spans)[0]
+    print("SpanHound demo — recorded agent failure")
+    print(f"Task: {run['task']}")
+    print(f"Tool: {failure['tool']}")
+    print(f"Failure: {failure['detail']}")
+    print(f"Approval: {decision['decision']} ({decision['approver']})")
+    print(f"Trace: {run['trace_id']} ({run['spans']} spans)")
+    print("\nThis trace came from a scripted agent-evals regression.")
+    print("Inspect your own JSONL or OTLP JSON traces with:")
+    print("  uvx spanhound --trace-dir /path/to/traces --check")
 
 
 @mcp.tool()
@@ -158,6 +178,12 @@ def main() -> None:
     global _trace_dir
     parser = argparse.ArgumentParser(description="MCP server for agent self-observability")
     parser.add_argument(
+        "command",
+        nargs="?",
+        choices=("demo",),
+        help="demo: inspect a bundled recorded agent failure without setup",
+    )
+    parser.add_argument(
         "--trace-dir",
         default=os.environ.get("MCP_TRACE_DIR", "./traces"),
         help="directory of JSONL spans or OTLP JSON exports (default: $MCP_TRACE_DIR or ./traces)",
@@ -168,6 +194,11 @@ def main() -> None:
         help="validate the trace directory and print recent run summaries, then exit",
     )
     args = parser.parse_args()
+    if args.command == "demo":
+        if args.check:
+            parser.error("demo and --check cannot be used together")
+        _demo()
+        return
     _trace_dir = Path(args.trace_dir).resolve()
     if args.check:
         try:
