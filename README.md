@@ -12,6 +12,9 @@ requiring an application-specific dashboard.
 > **Release status:** The `0.3.0` GitHub release is available, but the new PyPI
 > distribution is pending Trusted Publisher registration. Run the tagged Git
 > source with `uvx` below until `uvx mcp-trace-inspector` is available.
+> The [MCP Registry entry](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.abhishekash%2Fmcp-trace-inspector/versions)
+> currently lists the earlier `0.2.2` package; the `0.3.0` metadata follows the new PyPI release.
+> [Publication status and directory submission handoff](docs/directory-submission.md).
 
 It pairs with [agent-harness](https://github.com/abhishekash/agent-harness),
 but the reader is format-simple: any JSONL of OTel-shaped spans works. The

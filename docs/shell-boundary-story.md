@@ -21,7 +21,7 @@ git clone https://github.com/abhishekash/agent-evals
 cd agent-evals
 uv venv
 uv pip install -e .
-agent-evals run --tasks tasks/regressions --only shell-root-escape \
+.venv/bin/agent-evals run --tasks tasks/regressions --only shell-root-escape \
   --provider scripted --out /tmp/shell-root-escape-demo
 ```
 
