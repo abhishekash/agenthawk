@@ -2,6 +2,13 @@ name: publish-mcp-trace-inspector
 
 on:
   workflow_dispatch:
+    inputs:
+      tag:
+        description: Git tag to publish
+        required: true
+        type: string
+  release:
+    types: [published]
 
 permissions:
   contents: read
@@ -14,7 +21,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: v0.3.0
+          ref: ${{ github.event_name == 'release' && github.event.release.tag_name || inputs.tag }}
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -31,7 +38,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: v0.3.0
+          ref: ${{ github.event_name == 'release' && github.event.release.tag_name || inputs.tag }}
       - name: Install mcp-publisher
         run: |
           curl -fsSL "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_$(uname -s | tr '[:upper:]' '[:lower:]')_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/').tar.gz" | tar xz mcp-publisher
