@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "mcp-trace-inspector"
-version = "0.3.0"
+version = "0.3.1"
 description = "Agent observability MCP server for querying OpenTelemetry traces, failures, tool health, security evidence, and regressions."
 readme = "README.md"
 license = { text = "MIT" }
