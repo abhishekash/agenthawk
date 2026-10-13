@@ -1,7 +1,7 @@
 # SpanHound user guide
 
 SpanHound lets an MCP client ask questions about an agent's recorded traces.
-Point it at a directory of JSONL spans or OTLP JSON exports, connect it to an MCP client, and
+Capture OTLP/HTTP traces or point it at a directory of JSONL spans or OTLP JSON exports, connect it to an MCP client, and
 ask about a run's tool calls, failures, approvals, timing, or token usage.
 
 ## What it helps with
@@ -14,7 +14,7 @@ Use spanhound when you want to:
 - Compare recorded latency, tokens, tool calls, and failures across runs.
 - Keep traces on your own machine and query them from an MCP-capable client.
 
-spanhound is a read-only trace viewer. It does not run, change, retry, or stop
+spanhound's MCP tools are read-only. It does not run, change, retry, or stop
 the agent being observed. Live activity is returned by polling the trace files;
 there is no push stream. Results describe evidence in the traces. Missing
 identity or approval fields mean the producer did not record that evidence;
@@ -32,6 +32,8 @@ they do not prove a person or policy authorized an action.
 - Or saved OTLP/JSON trace exports (`.json`) containing a `resourceSpans` array,
   as produced by an OpenTelemetry exporter or collector. The reader accepts
   both formats in the same directory and searches subdirectories.
+- Or an agent that exports OTLP/HTTP traces to the local SpanHound receiver.
+  The agent must already have OpenTelemetry tracing enabled.
 
 The bundled [JSONL example](../examples/example_trace.jsonl) and
 [OTLP JSON example](../tests/fixtures/otlp_trace.json) work immediately. Backend-specific
@@ -89,9 +91,41 @@ access to trace-derived information, including task text and recorded tool
 diagnostics. Choose a trace directory appropriate for the client that will
 query it.
 
+## Capture OTLP traces
+
+Start a local receiver in a terminal:
+
+```bash
+uvx spanhound collect --trace-dir /absolute/path/to/traces
+```
+
+For an agent with an OpenTelemetry SDK and OTLP/HTTP exporter configured,
+set its trace endpoint and start it:
+
+```bash
+export OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://127.0.0.1:4318/v1/traces
+export OTEL_EXPORTER_OTLP_TRACES_PROTOCOL=http/protobuf
+# Start your instrumented agent here.
+```
+
+The receiver listens only on `127.0.0.1` and saves accepted requests as OTLP
+JSON files in the trace directory. It accepts OTLP/HTTP JSON and protobuf,
+including gzip requests, on `POST /v1/traces`. It does not support OTLP/gRPC,
+metrics, logs, or automatic instrumentation. If your exporter uses another
+endpoint or protocol, configure it for this HTTP endpoint. To use a different
+port, pass `--port 4319` and update the endpoint accordingly.
+
+The receiver limits each compressed and uncompressed request to 8 MiB. It has
+no authentication because it binds to loopback only. Trace files may contain
+prompts, tool inputs, and other private data; files are created with private
+permissions and stay on disk until you delete them. Use `--check` to inspect
+the captured runs, then connect your MCP client to the same directory.
+
 If your desktop client supports MCP Bundles, download the `.mcpb` asset from
 the [latest release](https://github.com/abhishekash/spanhound/releases/latest).
-Open it in the client and choose the folder containing your traces. The bundle
+The asset downloads a file; it is not a browser page. In Claude Desktop, open
+**Settings → Extensions → Advanced settings → Install Extension…**, select the
+downloaded `.mcpb`, and choose the folder containing your traces. The bundle
 uses UV to install dependencies on first run. The folder remains local to the
 client and SpanHound process.
 
@@ -222,8 +256,9 @@ credential patterns are redacted, but redaction is not a guarantee that every
 private value is removed. Review trace contents and client access before using
 it with sensitive data.
 
-The current server uses local stdio transport. It polls stored files for new
-spans rather than receiving push events. `security_audit` summarizes recorded
+The MCP server uses local stdio transport. It polls stored files for new spans;
+the optional receiver writes OTLP/HTTP trace requests to those files.
+`security_audit` summarizes recorded
 identity and provenance; it does not independently verify them. Cost totals
 are unknown when the trace producer does not provide reliable pricing.
 

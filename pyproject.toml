@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "spanhound"
-version = "0.4.2"
-description = "Read-only MCP queries for local agent JSONL and OTLP JSON traces, approvals, and failures."
+version = "0.5.0"
+description = "Capture local OpenTelemetry traces and inspect agent failures, approvals, and run regressions over MCP."
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.11"
@@ -20,10 +20,15 @@ classifiers = [
 ]
 dependencies = [
     "mcp>=2.0.0",
+    "opentelemetry-proto>=1.45,<2",
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8"]
+dev = [
+    "pytest>=8",
+    "opentelemetry-sdk>=1.45,<2",
+    "opentelemetry-exporter-otlp-proto-http>=1.45,<2",
+]
 
 [project.scripts]
 spanhound = "mcp_trace.server:main"

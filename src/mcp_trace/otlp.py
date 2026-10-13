@@ -71,13 +71,9 @@ def _span(raw: dict[str, Any], resource: dict[str, Any], path: Path) -> dict[str
     }
 
 
-def load_otlp_json(path: str | Path) -> list[dict[str, Any]]:
-    """Load a protobuf JSON ExportTraceServiceRequest or TracesData object."""
-    path = Path(path)
-    try:
-        data = json.loads(path.read_text(encoding="utf-8"))
-    except json.JSONDecodeError as exc:
-        raise ValueError(f"{path}: invalid OTLP JSON: {exc}") from exc
+def parse_otlp_json(data: Any, source: str | Path) -> list[dict[str, Any]]:
+    """Validate a decoded OTLP/JSON trace request and return queryable spans."""
+    path = Path(source)
     if not isinstance(data, dict) or not isinstance(data.get("resourceSpans"), list):
         raise ValueError(f"{path}: expected OTLP JSON with a resourceSpans array")
     spans = []
@@ -88,8 +84,18 @@ def load_otlp_json(path: str | Path) -> list[dict[str, Any]]:
                 for raw in scope.get("spans", []):
                     try:
                         spans.append(_span(raw, resource, path))
-                    except (KeyError, TypeError, ValueError) as exc:
+                    except (AttributeError, KeyError, TypeError, ValueError) as exc:
                         raise ValueError(f"span {len(spans) + 1}: {exc}") from exc
-        except (KeyError, TypeError, ValueError) as exc:
+        except (AttributeError, KeyError, TypeError, ValueError) as exc:
             raise ValueError(f"{path}: resourceSpans[{resource_index}]: {exc}") from exc
     return spans
+
+
+def load_otlp_json(path: str | Path) -> list[dict[str, Any]]:
+    """Load a protobuf JSON ExportTraceServiceRequest or TracesData object."""
+    path = Path(path)
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"{path}: invalid OTLP JSON: {exc}") from exc
+    return parse_otlp_json(data, path)
