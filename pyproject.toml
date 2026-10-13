@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "mcp-trace-inspector"
 version = "0.3.1"
-description = "Agent observability MCP server for querying OpenTelemetry traces, failures, tool health, security evidence, and regressions."
+description = "Read-only MCP queries for local agent-run JSONL traces, approvals, and failures."
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.11"
