@@ -28,6 +28,12 @@ for desktop clients. The public PyPI wheel and extracted bundle were both
 smoke-tested against the recorded regression trace.
 The workflow now validates Registry metadata before uploading to PyPI.
 
+`v0.5.0` is live on [PyPI](https://pypi.org/project/spanhound/0.5.0/),
+the [MCP Registry](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.abhishekash%2Fspanhound/versions),
+and as a [desktop bundle](https://github.com/abhishekash/spanhound/releases/download/v0.5.0/spanhound-v0.5.0.mcpb).
+It adds a loopback OTLP/HTTP trace receiver. The public wheel demo and uploaded
+bundle were verified after the release workflow passed.
+
 ## Directories
 
 - The [awesome-mcp-servers PR](https://github.com/punkpeye/awesome-mcp-servers/pull/16323)
