@@ -30,6 +30,14 @@ query that bounded error.
 uvx spanhound demo
 ```
 
+```text
+SpanHound demo — recorded agent failure
+Tool: run_shell
+Failure: error: shell path escapes workspace root: '../outside.txt'
+Approval: approve (auto)
+Trace: 563e779ee8fa2d7069fc63ed2cf9c8ec (6 spans)
+```
+
 The demo shows a recorded `run_shell` failure and its approval evidence from a
 bundled scripted regression trace. It needs no clone, account, trace backend, or
 MCP client. To inspect your own traces, point SpanHound at a directory of JSONL

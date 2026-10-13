@@ -53,14 +53,8 @@ This case taught me to keep the tool result in the trace. A trace that only says
 
 If you already emit OTel-shaped JSONL spans, I would like to hear whether these queries answer your real debugging questions. The project is a local stdio server today; remote transport and push updates remain open work.
 
-## Publish copy
+## Share this case
 
-**Show HN title:** Show HN: I built an MCP server to ask agent traces why a tool failed
-
-**Show HN text:** A coding-agent regression tried `cat ../outside.txt`. The harness blocked it, but the trace originally lacked the returned diagnostic. I added result/error recording, made a scripted regression in agent-evals, and built spanhound to query the JSONL spans over stdio MCP. The 48-second demo follows the real generated trace. The scripted pass tests the runtime contract, not live-model reliability. I would value feedback on the tool schema and which trace questions are still awkward. Demo: https://github.com/abhishekash/spanhound/blob/main/docs/media/shell-root-escape-demo.mp4
-
-**Reddit title:** I made a local MCP server that lets an agent inspect its own failed tool calls
-
-**Reddit text:** I hit a concrete observability gap while testing a workspace-boundary failure: the harness stopped `cat ../outside.txt`, but the old trace did not preserve the returned diagnostic. I fixed the trace, added a deterministic regression, and made an MCP reader with `search_spans`, `failure_report`, and `approval_log`. Here is a 48-second captioned run-through and a reproducible task: https://github.com/abhishekash/spanhound/blob/main/docs/shell-boundary-story.md . This is a scripted safety test, not a live-model benchmark. What failure evidence do you wish your agent traces kept?
-
-Post these in relevant communities only after checking their current self-promotion rules and choosing one concrete feedback question.
+The [launch kit](launch-kit.md) has channel-specific post drafts and the current
+submission links. Lead with the recorded failure and the one-command demo;
+the scripted trace does not measure live-model reliability.
