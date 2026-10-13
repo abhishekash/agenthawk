@@ -52,3 +52,30 @@ jobs:
         run: ./mcp-publisher login github-oidc
       - name: Publish server metadata
         run: ./mcp-publisher publish
+
+  publish-bundle:
+    if: github.event_name == 'release'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Stage and validate MCP Bundle
+        run: |
+          python scripts/stage_mcpb.py
+          npx --yes @anthropic-ai/mcpb@2.1.2 validate build/mcpb
+      - name: Pack and attach MCP Bundle
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p dist
+          npx --yes @anthropic-ai/mcpb@2.1.2 pack build/mcpb "dist/spanhound-${{ github.event.release.tag_name }}.mcpb"
+          gh release upload "${{ github.event.release.tag_name }}" "dist/spanhound-${{ github.event.release.tag_name }}.mcpb" --clobber

@@ -1,0 +1,48 @@
+{
+  "manifest_version": "0.4",
+  "name": "spanhound",
+  "display_name": "SpanHound",
+  "version": "0.4.2",
+  "description": "Inspect local agent traces for tool failures, approvals, and run regressions.",
+  "author": {
+    "name": "Abhishek Ash"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/abhishekash/spanhound"
+  },
+  "homepage": "https://github.com/abhishekash/spanhound",
+  "documentation": "https://github.com/abhishekash/spanhound/blob/main/docs/user-guide.md",
+  "support": "https://github.com/abhishekash/spanhound/issues",
+  "server": {
+    "type": "uv",
+    "entry_point": "src/mcp_trace/__main__.py",
+    "mcp_config": {
+      "command": "uv",
+      "args": [
+        "run",
+        "--directory",
+        "${__dirname}",
+        "spanhound",
+        "--trace-dir",
+        "${user_config.trace_dir}"
+      ]
+    }
+  },
+  "user_config": {
+    "trace_dir": {
+      "type": "directory",
+      "title": "Agent trace folder",
+      "description": "Choose a local folder containing JSONL spans or OTLP JSON exports.",
+      "required": true
+    }
+  },
+  "compatibility": {
+    "platforms": ["darwin", "linux", "win32"],
+    "runtimes": {
+      "python": ">=3.11"
+    }
+  },
+  "keywords": ["mcp", "agent-traces", "observability", "opentelemetry"],
+  "license": "MIT"
+}

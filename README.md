@@ -24,7 +24,25 @@ The project's concrete origin was a shell-boundary regression: the harness block
 called, not the returned diagnostic. SpanHound and the harness now preserve and
 query that bounded error.
 
-## Try the included trace
+## Try it in one command
+
+```bash
+uvx spanhound demo
+```
+
+The demo shows a recorded `run_shell` failure and its approval evidence from a
+bundled scripted regression trace. It needs no clone, account, trace backend, or
+MCP client. To inspect your own traces, point SpanHound at a directory of JSONL
+spans or saved OTLP JSON exports:
+
+```bash
+uvx spanhound --trace-dir /path/to/traces --check
+```
+
+`--check` prints the runs it found and exits. Connect an MCP client with the
+[configuration below](#client-configuration) to ask questions about those runs.
+
+## Explore the repository fixtures
 
 ```bash
 git clone https://github.com/abhishekash/spanhound.git
@@ -32,10 +50,8 @@ cd spanhound
 uvx --from . spanhound --trace-dir examples --check
 ```
 
-`--check` prints JSON with the trace directory, span count, and recent run
-summaries, then exits. It also reports a missing directory or malformed complete
-JSONL or OTLP JSON record. To ask questions through MCP, connect a client using the
-[configuration below](#client-configuration).
+`--check` also reports a missing directory or malformed complete JSONL or OTLP
+JSON record.
 
 To try an OTLP JSON export, run the same command with `--trace-dir tests/fixtures`.
 The [sample export](tests/fixtures/otlp_trace.json) includes a model call, token
@@ -85,6 +101,13 @@ git clone https://github.com/abhishekash/spanhound
 cd spanhound
 uvx --from . spanhound --trace-dir ./traces
 ```
+
+For a desktop client that accepts [MCP Bundles](https://github.com/modelcontextprotocol/mcpb),
+download the `.mcpb` asset from the [latest release](https://github.com/abhishekash/spanhound/releases/latest)
+and open it in the client. The bundle asks you to choose a local trace folder.
+It uses UV to install its Python dependencies on first run. SpanHound reads
+the folder locally; the connected client receives the evidence returned by its
+MCP tools.
 
 If you previously ran `uvx mcp-trace-inspector`, change that command to
 `uvx spanhound` to receive this release. The old PyPI distribution stays at

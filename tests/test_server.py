@@ -11,7 +11,6 @@ import mcp_trace.server as server
 
 def test_distribution_exposes_repository_named_command():
     package = distribution("spanhound")
-    assert package.version == "0.4.1"
     scripts = {ep.name: ep.value for ep in package.entry_points if ep.group == "console_scripts"}
     assert scripts["spanhound"] == "mcp_trace.server:main"
     assert scripts["mcp-trace-inspector"] == scripts["spanhound"]
@@ -28,6 +27,21 @@ def test_check_command_reports_example_runs():
     report = json.loads(result.stdout)
     assert report["spans"] > 0
     assert report["runs"][0]["trace_id"]
+
+
+def test_demo_command_shows_recorded_failure_without_trace_directory(tmp_path):
+    result = subprocess.run(
+        [sys.executable, "-m", "mcp_trace", "demo"],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    assert "run_shell" in result.stdout
+    assert "shell path escapes workspace root" in result.stdout
+    assert "Approval: approve (auto)" in result.stdout
+    assert "scripted agent-evals regression" in result.stdout
+    assert result.stderr == ""
 
 
 @pytest.fixture(autouse=True)

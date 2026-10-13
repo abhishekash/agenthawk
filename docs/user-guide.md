@@ -39,6 +39,23 @@ exports, such as Jaeger JSON, may need conversion to OTLP/JSON.
 
 ## Install and start
 
+First, try the bundled failure trace without configuring an MCP client:
+
+```bash
+uvx spanhound demo
+```
+
+The demo prints a tool failure, its recorded approval, and the trace ID from a
+scripted regression. It works from any directory and does not read your files.
+
+To inspect your own traces, validate their directory:
+
+```bash
+uvx spanhound --trace-dir /absolute/path/to/traces --check
+```
+
+Then configure your MCP client to run the server:
+
 ```bash
 uvx spanhound --trace-dir /absolute/path/to/traces
 ```
@@ -71,6 +88,12 @@ The server is local and read-only. Connecting an MCP client gives that client
 access to trace-derived information, including task text and recorded tool
 diagnostics. Choose a trace directory appropriate for the client that will
 query it.
+
+If your desktop client supports MCP Bundles, download the `.mcpb` asset from
+the [latest release](https://github.com/abhishekash/spanhound/releases/latest).
+Open it in the client and choose the folder containing your traces. The bundle
+uses UV to install dependencies on first run. The folder remains local to the
+client and SpanHound process.
 
 ## Connect an MCP client
 
