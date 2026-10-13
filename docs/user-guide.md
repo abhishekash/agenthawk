@@ -23,7 +23,9 @@ they do not prove a person or policy authorized an action.
 ## Requirements
 
 - Python 3.11 or newer.
-- An MCP client that can launch a local stdio server.
+- An MCP client that can launch a local stdio server, if you want to query
+  traces from a chat client. The demo, capture commands, and `--check` work
+  without one.
 - JSONL traces in the project's OTel-shaped span format. The reader expects each
   line to contain a span with `trace_id`, `span_id`, `name`,
   `start_unix_nano`, `end_unix_nano`, `attributes`, and, where available,
@@ -34,6 +36,8 @@ they do not prove a person or policy authorized an action.
   both formats in the same directory and searches subdirectories.
 - Or an agent that exports OTLP/HTTP traces to the local SpanHound receiver.
   The agent must already have OpenTelemetry tracing enabled.
+- Or a Python agent using OpenAI, Anthropic, OpenAI Agents, HTTPX, or Requests.
+  Install `spanhound[auto]` in that agent's environment and use `spanhound run`.
 
 The bundled [JSONL example](../examples/example_trace.jsonl) and
 [OTLP JSON example](../tests/fixtures/otlp_trace.json) work immediately. Backend-specific
@@ -91,6 +95,38 @@ access to trace-derived information, including task text and recorded tool
 diagnostics. Choose a trace directory appropriate for the client that will
 query it.
 
+## Capture a Python agent in one command
+
+Install SpanHound with the optional auto instrumentation in the **same Python
+environment as your agent**:
+
+```bash
+python -m pip install 'spanhound[auto]'
+spanhound run --trace-dir ./traces -- python agent.py
+```
+
+In a uv project, use `uv add 'spanhound[auto]'` followed by
+`uv run spanhound run -- python agent.py`. `spanhound run` starts a local
+receiver on an available loopback port, configures the child process's OTLP
+exporter, runs the agent, and stops the receiver when it exits. The agent's
+normal output and exit code are preserved. No exporter environment variables
+or tracing code are needed for supported libraries.
+
+The optional package enables OpenAI, Anthropic, OpenAI Agents, HTTPX, and
+Requests instrumentation when your agent uses those libraries. It does not
+trace arbitrary Python functions, local tool calls, or approval decisions
+unless an installed instrumentation package emits those spans. The command
+reports when no spans were captured; in that case, check the agent's libraries
+and install their matching OpenTelemetry instrumentation package in the same
+environment. The runner currently supports Python commands only. Use
+`spanhound run --help` for its options.
+
+After the run, point the MCP server at the same trace folder:
+
+```bash
+spanhound --trace-dir ./traces --check
+```
+
 ## Capture OTLP traces
 
 Start a local receiver in a terminal:
@@ -111,7 +147,7 @@ export OTEL_EXPORTER_OTLP_TRACES_PROTOCOL=http/protobuf
 The receiver listens only on `127.0.0.1` and saves accepted requests as OTLP
 JSON files in the trace directory. It accepts OTLP/HTTP JSON and protobuf,
 including gzip requests, on `POST /v1/traces`. It does not support OTLP/gRPC,
-metrics, logs, or automatic instrumentation. If your exporter uses another
+metrics, or logs. If your exporter uses another
 endpoint or protocol, configure it for this HTTP endpoint. To use a different
 port, pass `--port 4319` and update the endpoint accordingly.
 

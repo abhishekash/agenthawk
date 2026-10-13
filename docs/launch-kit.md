@@ -1,9 +1,9 @@
 # SpanHound launch kit
 
-SpanHound is an MIT-licensed local OTLP/HTTP receiver and read-only stdio MCP
-server for **agent traces**. It captures standard traces from instrumented agents
-or reads saved JSONL spans and OTLP JSON exports, then answers questions about
-recorded tool errors, approvals, token usage, and run changes.
+SpanHound is an MIT-licensed local trace capture tool and read-only stdio MCP
+server for **agent traces**. It can auto-instrument supported Python libraries,
+receive OTLP/HTTP traces, or read saved JSONL and OTLP JSON files. It answers
+questions about recorded tool errors, approvals, token usage, and run changes.
 
 ## One-line demonstration
 
@@ -47,10 +47,10 @@ unrelated issues and discussions.
 but the trace initially recorded only the call, not the returned error. I fixed
 the trace and built SpanHound, a local read-only MCP server that can query saved
 JSONL spans and OTLP JSON exports for failures and approval decisions. It can
-also receive OTLP/HTTP traces locally from an instrumented agent.
+also capture supported Python agents with `spanhound run` or receive OTLP/HTTP.
 
 You can see the bundled scripted case with `uvx spanhound demo` (no MCP client
-needed), then point it at your own supported trace files or send OTLP/HTTP
+needed), then capture a Python agent with `spanhound run` or send OTLP/HTTP
 traces to `spanhound collect`. The 48-second video
 and formats are in the repo: https://github.com/abhishekash/spanhound
 
@@ -67,8 +67,9 @@ often fail to keep?
 its workspace. The tool blocked the call, but our old trace only said the call
 happened. I added the returned diagnostic and approval event to the trace, then
 made a read-only MCP server to query that evidence from local JSONL spans or
-OTLP JSON exports. `uvx spanhound collect` can receive OTLP/HTTP traces from
-an instrumented agent. `uvx spanhound demo` shows the bundled scripted trace
+OTLP JSON exports. `spanhound run` can auto-capture supported Python library
+calls; `uvx spanhound collect` can receive OTLP/HTTP traces from another runtime.
+`uvx spanhound demo` shows the bundled scripted trace
 without setup; the README has the 48-second video and exact format requirements.
 It stores local OTLP/HTTP requests as files. I would value
 feedback on which failure or approval questions are hard to answer from your
@@ -86,8 +87,9 @@ was called. That was too little evidence to explain the result later.
 
 I fixed the harness trace and built SpanHound to inspect saved local trace
 files through read-only MCP tools. It reads the supported JSONL span format and
-saved OTLP JSON exports, and can receive local OTLP/HTTP traces. A client can ask for failed calls, recorded approvals,
-token use, or differences between runs.
+saved OTLP JSON exports, capture supported Python libraries, and receive local
+OTLP/HTTP traces. A client can ask for failed calls, recorded approvals, token
+use, or differences between runs.
 
 Try the exact case with `uvx spanhound demo`. It prints the blocked call, the
 returned error, and the automated approval from a bundled scripted trace. The

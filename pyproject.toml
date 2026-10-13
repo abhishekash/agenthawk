@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "spanhound"
-version = "0.5.0"
-description = "Capture local OpenTelemetry traces and inspect agent failures, approvals, and run regressions over MCP."
+version = "0.6.0"
+description = "Capture and inspect local agent traces, failures, approvals, and run regressions over MCP."
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.11"
@@ -24,8 +24,18 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+auto = [
+    "opentelemetry-distro>=0.66b1,<0.67",
+    "opentelemetry-exporter-otlp-proto-http>=1.45,<2",
+    "opentelemetry-instrumentation-httpx>=0.66b1,<0.67",
+    "opentelemetry-instrumentation-requests>=0.66b1,<0.67",
+    "opentelemetry-instrumentation-genai-openai>=1.2b0,<1.3",
+    "opentelemetry-instrumentation-genai-anthropic>=1.2b0,<1.3",
+    "opentelemetry-instrumentation-genai-openai-agents>=1.2b0,<1.3",
+]
 dev = [
     "pytest>=8",
+    "openai>=1.26,<4",
     "opentelemetry-sdk>=1.45,<2",
     "opentelemetry-exporter-otlp-proto-http>=1.45,<2",
 ]
