@@ -34,6 +34,13 @@ and as a [desktop bundle](https://github.com/abhishekash/spanhound/releases/down
 It adds a loopback OTLP/HTTP trace receiver. The public wheel demo and uploaded
 bundle were verified after the release workflow passed.
 
+`v0.6.0` is live on [PyPI](https://pypi.org/project/spanhound/0.6.0/),
+the [MCP Registry](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.abhishekash%2Fspanhound/versions),
+and as a [desktop bundle](https://github.com/abhishekash/spanhound/releases/download/v0.6.0/spanhound-v0.6.0.mcpb).
+It adds `spanhound run` with optional Python auto instrumentation. The public
+PyPI package was smoke-tested by capturing a Requests span without app tracing
+code; the CI suite also covered an OpenAI SDK model call and token usage.
+
 ## Directories
 
 - The [awesome-mcp-servers PR](https://github.com/punkpeye/awesome-mcp-servers/pull/16323)
