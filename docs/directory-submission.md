@@ -18,14 +18,12 @@ In the PyPI account that owns the project, add a **pending Trusted Publisher** w
 
 Then dispatch [`publish-mcp-trace-inspector.yml`](../.github/workflows/publish-mcp-trace-inspector.yml). It checks out `v0.3.0`, uploads the renamed distribution, and publishes the `0.3.0` Registry metadata after upload succeeds. Verify both the [PyPI project](https://pypi.org/project/mcp-trace-inspector/) and [Registry namespace](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.abhishekash%2Fmcp-trace-inspector/versions) afterward. [PyPI's pending publisher guide](https://docs.pypi.org/trusted-publishers/creating-a-project-through-oidc/) explains the account setup.
 
-## Submit to `awesome-mcp-servers`
+## `awesome-mcp-servers` submission
 
-The [contribution guide](https://github.com/punkpeye/awesome-mcp-servers/blob/main/CONTRIBUTING.md) requires a fork, a single README entry, and a PR. Put this line in the alphabetical part of the `Monitoring` section, between `adanb13/cirdan` and `agentkitai/agentlens`:
+The [directory PR](https://github.com/punkpeye/awesome-mcp-servers/pull/16323) is open. It adds one entry in the `Monitoring` section, between `A1-x-Tech/mcp-google-crux` and `adanb13/cirdan`:
 
 ```markdown
 - [abhishekash/mcp-trace-inspector](https://github.com/abhishekash/mcp-trace-inspector) 🐍 🏠 🍎 🪟 🐧 - Read-only MCP queries for local JSONL OpenTelemetry agent traces: failures, approvals, token usage, tool health, and run comparisons.
 ```
 
-Suggested PR title: `Add abhishekash/mcp-trace-inspector`.
-
-The current README has no entry for this repo. The connected GitHub integration cannot create a fork in this third-party repository, and the local `gh` session is unauthenticated, so this PR has not been submitted. Check whether Glama has indexed the server before adding a Glama badge; do not attach a badge that points to an unverified listing.
+The directory's `check-submission` job passed on 2026-10-13. A Glama badge was omitted because its listing has not been verified. The maintainers still need to review and merge the PR.
