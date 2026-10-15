@@ -2,13 +2,20 @@
 
 <!-- mcp-name: io.github.abhishekash/spanhound -->
 
-[![CI](https://github.com/abhishekash/spanhound/actions/workflows/ci.yml/badge.svg)](https://github.com/abhishekash/spanhound/actions/workflows/ci.yml) [![PyPI](https://img.shields.io/pypi/v/spanhound)](https://pypi.org/project/spanhound/) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![CI](https://github.com/abhishekash/spanhound/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/abhishekash/spanhound/actions/workflows/ci.yml)
+[![PyPI](https://img.shields.io/pypi/v/spanhound)](https://pypi.org/project/spanhound/)
+[![Downloads](https://img.shields.io/pypi/dm/spanhound?label=downloads%2Fmonth)](https://pypistats.org/packages/spanhound)
+[![GitHub release](https://img.shields.io/github/v/release/abhishekash/spanhound)](https://github.com/abhishekash/spanhound/releases/latest)
+[![GitHub stars](https://img.shields.io/github/stars/abhishekash/spanhound?style=social)](https://github.com/abhishekash/spanhound/stargazers)
+[![MCP Registry](https://img.shields.io/badge/MCP%20Registry-listed-2e8b57)](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.abhishekash%2Fspanhound/versions)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-3776AB?logo=python&logoColor=white)
 
-**Capture local OpenTelemetry traces and inspect agent-run failures and approvals.**
-SpanHound (formerly mcp-trace-inspector) is a local OTLP/HTTP trace receiver and
-stdio MCP server for inspecting agent-run traces, including tool failures,
-approval decisions, and changes between runs. Its MCP tools read JSONL spans
-and OTLP JSON exports as described in the
+**Capture local agent traces. Ask your MCP client what happened.** SpanHound
+(formerly mcp-trace-inspector) captures supported Python agent calls, receives
+OpenTelemetry over local OTLP/HTTP, and exposes read-only MCP tools for
+failures, approval decisions, token usage, and run comparisons. It reads JSONL
+spans and OTLP JSON exports as described in the
 [user guide](docs/user-guide.md), including traces from
 [agent-harness](https://github.com/abhishekash/agent-harness).
 
