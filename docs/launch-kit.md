@@ -87,7 +87,7 @@ was called. That was too little evidence to explain the result later.
 
 I fixed the harness trace and built SpanHound to inspect saved local trace
 files through read-only MCP tools. It reads the supported JSONL span format and
-saved OTLP JSON exports, capture supported Python libraries, and receive local
+saved OTLP JSON exports, captures supported Python libraries, and receives local
 OTLP/HTTP traces. A client can ask for failed calls, recorded approvals, token
 use, or differences between runs.
 
@@ -130,6 +130,11 @@ I am trying to make the first minute understandable to someone who has not
 used MCP. Does the demo explain why keeping the actual tool result matters?
 
 ## Existing distribution
+
+For a live dashboard alongside file-based MCP investigation, link to
+[Agent Observatory](https://github.com/abhishekash/agent-observatory), now public.
+These tools have different inputs: Observatory reads supported local session
+records and received telemetry; SpanHound queries JSONL and OTLP JSON trace files.
 
 - Published on [PyPI](https://pypi.org/project/spanhound/) and the
   [official MCP Registry](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.abhishekash%2Fspanhound/versions).

@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "spanhound"
-version = "0.6.0"
+version = "0.6.1"
 description = "Capture and inspect local agent traces, failures, approvals, and run regressions over MCP."
 readme = "README.md"
 license = { text = "MIT" }
@@ -50,6 +50,8 @@ mcp-trace = "mcp_trace.server:main"
 abhishekash-mcp-trace = "mcp_trace.server:main"
 
 [project.urls]
+Documentation = "https://github.com/abhishekash/spanhound/blob/main/docs/user-guide.md"
+Changelog = "https://github.com/abhishekash/spanhound/releases"
 Homepage = "https://github.com/abhishekash/spanhound"
 Repository = "https://github.com/abhishekash/spanhound"
 Issues = "https://github.com/abhishekash/spanhound/issues"

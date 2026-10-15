@@ -1,0 +1,26 @@
+name: First-run feedback
+description: Tell us what you tried and what would make the tool more useful.
+title: "First run: "
+body:
+  - type: markdown
+    attributes:
+      value: "Thanks for trying SpanHound. Share redacted excerpts; traces can contain prompts and credentials."
+  - type: textarea
+    id: goal
+    attributes:
+      label: What were you trying to investigate?
+      placeholder: "Your MCP client or trace producer, and the question you wanted to answer."
+    validations:
+      required: true
+  - type: textarea
+    id: experience
+    attributes:
+      label: What happened?
+      description: "What worked, what was missing, and any steps that reproduce a problem."
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      placeholder: "OS, Python version, SpanHound version, and install command."

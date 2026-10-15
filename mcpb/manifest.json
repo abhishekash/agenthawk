@@ -2,7 +2,7 @@
   "manifest_version": "0.4",
   "name": "spanhound",
   "display_name": "SpanHound",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "Inspect local agent traces for tool failures, approvals, and run regressions.",
   "author": {
     "name": "Abhishek Ash"

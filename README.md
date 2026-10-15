@@ -8,7 +8,7 @@
 [![GitHub release](https://img.shields.io/github/v/release/abhishekash/spanhound)](https://github.com/abhishekash/spanhound/releases/latest)
 [![GitHub stars](https://img.shields.io/github/stars/abhishekash/spanhound?style=social)](https://github.com/abhishekash/spanhound/stargazers)
 [![MCP Registry](https://img.shields.io/badge/MCP%20Registry-listed-2e8b57)](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.abhishekash%2Fspanhound/versions)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/abhishekash/spanhound/blob/main/LICENSE)
 ![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-3776AB?logo=python&logoColor=white)
 
 **Capture local agent traces. Ask your MCP client what happened.** SpanHound
@@ -16,16 +16,16 @@
 OpenTelemetry over local OTLP/HTTP, and exposes read-only MCP tools for
 failures, approval decisions, token usage, and run comparisons. It reads JSONL
 spans and OTLP JSON exports as described in the
-[user guide](docs/user-guide.md), including traces from
+[user guide](https://github.com/abhishekash/spanhound/blob/main/docs/user-guide.md), including traces from
 [agent-harness](https://github.com/abhishekash/agent-harness).
 
 <p align="center">
-  <a href="docs/media/shell-root-escape-demo.mp4">
-    <img src="docs/media/shell-root-escape-preview.gif" width="960" alt="Animated demo: a blocked tool call becomes an inspectable trace" />
+  <a href="https://github.com/abhishekash/spanhound/blob/main/docs/media/shell-root-escape-demo.mp4">
+    <img src="https://raw.githubusercontent.com/abhishekash/spanhound/main/docs/media/shell-root-escape-preview.gif" width="960" alt="Animated demo: a blocked tool call becomes an inspectable trace" />
   </a>
 </p>
 
-**Demo:** [Watch the full 48-second video](docs/media/shell-root-escape-demo.mp4) · [Read the reproducible story](docs/shell-boundary-story.md). This is a scripted regression trace, not a live-model benchmark.
+**Demo:** [Watch the full 48-second video](https://github.com/abhishekash/spanhound/blob/main/docs/media/shell-root-escape-demo.mp4) · [Read the reproducible story](https://github.com/abhishekash/spanhound/blob/main/docs/shell-boundary-story.md). This is a scripted regression trace, not a live-model benchmark.
 
 The project's concrete origin was a shell-boundary regression: the harness blocked
 `cat ../outside.txt`, but the old trace recorded only that `run_shell` was
@@ -56,7 +56,7 @@ uvx spanhound --trace-dir /path/to/traces --check
 ```
 
 `--check` prints the runs it found and exits. Connect an MCP client with the
-[configuration below](#client-configuration) to ask questions about those runs.
+[configuration below](https://github.com/abhishekash/spanhound#client-configuration) to ask questions about those runs.
 
 ## Explore the repository fixtures
 
@@ -70,7 +70,7 @@ uvx --from . spanhound --trace-dir examples --check
 JSON record.
 
 To try an OTLP JSON export, run the same command with `--trace-dir tests/fixtures`.
-The [sample export](tests/fixtures/otlp_trace.json) includes a model call, token
+The [sample export](https://github.com/abhishekash/spanhound/blob/main/tests/fixtures/otlp_trace.json) includes a model call, token
 usage, a tool call, and an exception.
 
 ## Capture your own traces
@@ -89,7 +89,7 @@ package includes instrumentation for OpenAI, Anthropic, OpenAI Agents, HTTPX,
 and Requests. It reports when no spans were produced. Your Python agent and
 SpanHound must share one environment; for a uv project, use
 `uv add 'spanhound[auto]'` and `uv run spanhound run -- python agent.py`.
-See the [Python capture guide](docs/user-guide.md#capture-a-python-agent-in-one-command).
+See the [Python capture guide](https://github.com/abhishekash/spanhound/blob/main/docs/user-guide.md#capture-a-python-agent-in-one-command).
 
 For other runtimes, or agents that already export OpenTelemetry traces, start
 the receiver in one terminal:
@@ -111,14 +111,18 @@ SpanHound stores each accepted OTLP/HTTP trace request as a local JSON file.
 Run `uvx spanhound --trace-dir ./traces --check` to see the captured runs, then
 connect your MCP client to that folder. The receiver accepts OTLP/HTTP JSON or
 protobuf on loopback; it does not add instrumentation to an agent. See the
-[capture guide](docs/user-guide.md#capture-otlp-traces) for limits and privacy.
+[capture guide](https://github.com/abhishekash/spanhound/blob/main/docs/user-guide.md#capture-otlp-traces) for limits and privacy.
 
 ## Where it fits
+
+For a live terminal and browser view of local Codex/Claude Code sessions and
+received OTLP telemetry, try [Agent Observatory](https://github.com/abhishekash/agent-observatory).
+SpanHound provides trace investigation through MCP using JSONL and OTLP JSON files.
 
 Use this when you want a local trace view through MCP without setting up a
 trace backend. Capture supported Python library calls in one command, receive
 OTLP/HTTP from another runtime, or read the [supported JSONL or OTLP JSON
-formats](docs/user-guide.md#requirements). Focused queries include recorded
+formats](https://github.com/abhishekash/spanhound/blob/main/docs/user-guide.md#requirements). Focused queries include recorded
 approval decisions, bounded failure diagnostics, and run comparisons.
 
 [MCP Agent Trace Inspector](https://github.com/dbsectrainer/mcp-agent-trace-inspector)
@@ -145,7 +149,7 @@ backend-specific JSON exports.
 | "What is happening in the run right now?" | `recent_activity` | Cursor-based polling of newly written spans. |
 | "Did this model/version regress?" | `compare_runs` | Cost, latency, tokens, tool calls, and failure deltas. |
 
-The tools read stored traces and can poll files being written, but they do not push events or infer intent from the final answer. Start with the [installation and user guide](docs/user-guide.md), then see the [real trace fixture](examples/example_trace.jsonl) and the [tool descriptions](src/mcp_trace/server.py) for the query contract.
+The tools read stored traces and can poll files being written, but they do not push events or infer intent from the final answer. Start with the [installation and user guide](https://github.com/abhishekash/spanhound/blob/main/docs/user-guide.md), then see the [real trace fixture](https://github.com/abhishekash/spanhound/blob/main/examples/example_trace.jsonl) and the [tool descriptions](https://github.com/abhishekash/spanhound/blob/main/src/mcp_trace/server.py) for the query contract.
 
 ## Install & run
 
@@ -253,7 +257,7 @@ traces/*.json  ──┴─▶ mcp_trace.core (local query functions)
 - **bounded output**: diagnostics are truncated and obvious credentials are redacted before query results leave the server.
 - **honest cost totals**: `token_usage` returns `cost_known: false` and a null cost when any model span lacks a cost or marks pricing as unavailable; unknown pricing is never presented as `$0`.
 - **cursor polling**: `recent_activity` makes the snapshot reader useful while a run is still writing spans.
-- The demo fixture ([`examples/example_trace.jsonl`](examples/example_trace.jsonl)) is a *real* agent-harness run, not hand-written.
+- The demo fixture ([`examples/example_trace.jsonl`](https://github.com/abhishekash/spanhound/blob/main/examples/example_trace.jsonl)) is a *real* agent-harness run, not hand-written.
 
 ## Honest limitations
 
@@ -263,6 +267,12 @@ traces/*.json  ──┴─▶ mcp_trace.core (local query functions)
 - read-only tools; trace mutation (annotations) is roadmap
 - The Python query and server modules are available as `mcp_trace`; older import and command aliases remain for existing clients.
 
+## First-run feedback
+
+[Tell us what happened when you tried it](https://github.com/abhishekash/spanhound/issues/new?template=first_run.yml):
+your MCP client or trace producer, the question you were trying to answer, and
+any missing evidence. Share a redacted excerpt when a file fails to load.
+
 ## License
 
-MIT
+[MIT](https://github.com/abhishekash/spanhound/blob/main/LICENSE)
