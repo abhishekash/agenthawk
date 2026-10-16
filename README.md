@@ -8,6 +8,7 @@
 [![GitHub release](https://img.shields.io/github/v/release/abhishekash/spanhound)](https://github.com/abhishekash/spanhound/releases/latest)
 [![GitHub stars](https://img.shields.io/github/stars/abhishekash/spanhound?style=social)](https://github.com/abhishekash/spanhound/stargazers)
 [![MCP Registry](https://img.shields.io/badge/MCP%20Registry-listed-2e8b57)](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.abhishekash%2Fspanhound/versions)
+[![Glama MCP server](https://glama.ai/mcp/servers/abhishekash/spanhound/badges/score.svg)](https://glama.ai/mcp/servers/abhishekash/spanhound)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/abhishekash/spanhound/blob/main/LICENSE)
 ![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-3776AB?logo=python&logoColor=white)
 
