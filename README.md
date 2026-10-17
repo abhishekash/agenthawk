@@ -1,6 +1,10 @@
-# SpanHound
-
 <!-- mcp-name: io.github.abhishekash/spanhound -->
+
+<p align="center">
+  <img src="docs/media/logo.png" alt="SpanHound logo" width="640">
+</p>
+
+# SpanHound
 
 [![CI](https://github.com/abhishekash/spanhound/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/abhishekash/spanhound/actions/workflows/ci.yml)
 [![PyPI](https://img.shields.io/pypi/v/spanhound)](https://pypi.org/project/spanhound/)
